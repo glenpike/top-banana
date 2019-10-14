@@ -5,89 +5,7 @@
   #include <avr/power.h>
 #endif
 
-enum ledPattern { OFF, ON, FLASH };
-class LED
-{
-  // Class Member Variables
-  // These are initialized at startup
-  int ledPin;      // the number of the LED pin
-  ledPattern  ActivePattern;  // which pattern is running
-  unsigned long Interval;   // milliseconds until it calls OnComplete
-  unsigned long lastShow; // last time we called Show
-  
-  void (*OnComplete)();  // Callback when the interval expires
-  
-  public:
-  // These maintain the current state
-  int ledState;                 // ledState used to set the LED
-  
-  LED(int pin, void (*callback)())
-  {
-    ledPin = pin;
-    pinMode(ledPin, OUTPUT);  
-    ledState = LOW;
-    OnComplete = callback;
-    Interval = 0;
-  }
-
-  void Toggle()
-  {
-    if(ledState == HIGH)
-    {
-      TurnOff(Interval);
-    }
-    else
-    {
-      TurnOn(Interval);
-    }
-  }
-
-  void TurnOn(unsigned long interval)
-  {
-    if(ledState == LOW)
-    {
-      ledState = HIGH;
-    }
-    Show(interval);
-  }
-
-  void TurnOff(unsigned long interval)
-  {
-    if(ledState == HIGH)
-    {
-      ledState = LOW;
-    }
-    Show(interval);
-  }
-  
-  void Update()
-  {
-    if((millis() - lastShow) > Interval) // time to update
-    {
-      if (OnComplete != NULL)
-      {
-          OnComplete(); // call the comlpetion callback
-      }
-    }
-  }
-
-  void Show(unsigned long interval)
-  {
-    Interval = interval;
-    lastShow = millis();
-    digitalWrite(ledPin, ledState);
-    #ifdef SERIAL_DEBUG
-      Serial.print("LED.Show: ");
-      Serial.print(ledPin);
-      Serial.print(" = ");
-      Serial.print(ledState);
-      Serial.print(" for ");
-      Serial.print(interval);
-      Serial.print(" current ");
-      Serial.println(lastShow);
-    #endif
-  }
-};
+#include "single_led.h"
 
 enum stripPattern { STRIP_OFF, STRIP_ON, RAINBOW_CYCLE, THEATER_CHASE, COLOR_WIPE, SCANNER, FADE };
 enum  direction { FORWARD, REVERSE };
@@ -442,7 +360,7 @@ void Panel1Complete();
 void Strip1Complete();
 void Strip2Complete();
 
-LED Panel1(6, &Panel1Complete);
+Single_LED Panel1(6, &Panel1Complete);
 
 #define LED_PIN 4
 #define LED_COUNT 100
