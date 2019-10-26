@@ -24,7 +24,7 @@ class PatternConfig {
     uint32_t color2;
     uint16_t steps;
 
-    PatternConfig(sectionPattern pttn = STRIP_OFF, uint32_t intrvl = 0,
+    PatternConfig(sectionPattern pttn = STRIP_OFF, uint32_t intrvl = 10,
                   direction d = FORWARD, uint32_t clr1 = 0, uint32_t clr2 = 0,
                   uint16_t stps = 0) {
         pattern = pttn;
@@ -34,6 +34,10 @@ class PatternConfig {
         color2 = clr2;
         steps = stps;
     }
+};
+
+struct CallBackHandler {
+    virtual void OnComplete(void *p);
 };
 
 class NeoPixel_Section {
@@ -53,13 +57,17 @@ class NeoPixel_Section {
     uint16_t TotalSteps;     // total number of steps in the pattern
     uint16_t Index;          // current step within the pattern
 
-    void (*OnComplete)(); // Callback on completion of pattern
+    CallBackHandler *m_pCallbackHandler;
 
+    uint8_t PatternCompleted = 0;
+    
     NeoPixel_Section(Adafruit_NeoPixel* strip, uint16_t start, uint16_t length,
-                     void (*callback)());
-
+                     CallBackHandler *handler);
+                     
+    void SetCallback(CallBackHandler *handler = NULL) { m_pCallbackHandler = handler; }
     void SetPattern(PatternConfig config);
     void Update();
+    // Consider 'single-shot' animation or continuous?
     void Increment();
     void Reverse();
 
@@ -96,9 +104,8 @@ class NeoPixel_Section {
     uint32_t Wheel(byte WheelPos);
 
   protected:
-    void StripOnUpdate();
-    void StripOffUpdate();
-    
+    void StripAllUpdate();
+
     void RainbowCycleUpdate();
     void TheaterChaseUpdate();
 

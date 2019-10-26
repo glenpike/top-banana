@@ -1,15 +1,19 @@
 #include "NeoPixel_Section.h"
 //#define SERIAL_DEBUG 1
 NeoPixel_Section::NeoPixel_Section(Adafruit_NeoPixel* strip, uint16_t start,
-                                   uint16_t length, void (*callback)()) {
+                                   uint16_t length, CallBackHandler *handler = NULL) {
     ledStrip = strip;
     stripStart = start;
     stripLength = length;
-    OnComplete = callback;
+    m_pCallbackHandler = handler;
 }
 
 void NeoPixel_Section::SetPattern(PatternConfig config) {
-    switch (config.pattern) {
+    ActivePattern = config.pattern;
+    Interval = config.interval;
+    Index = 0;
+    PatternCompleted = 0;
+    switch (ActivePattern) {
     case STRIP_ON:
         StripOn(config);
         break;
@@ -42,10 +46,10 @@ void NeoPixel_Section::Update() {
         lastUpdate = millis();
         switch (ActivePattern) {
         case STRIP_ON:
-            StripOnUpdate();
+            StripAllUpdate();
             break;
         case STRIP_OFF:
-            StripOffUpdate();
+            StripAllUpdate();
             break;
         case RAINBOW_CYCLE:
             RainbowCycleUpdate();
@@ -74,16 +78,22 @@ void NeoPixel_Section::Increment() {
         Index++;
         if (Index >= TotalSteps) {
             Index = 0;
-            if (OnComplete != NULL) {
-                OnComplete();
+            if (PatternCompleted == 0) {
+                PatternCompleted = 1;
+                if (m_pCallbackHandler != NULL) {
+                    m_pCallbackHandler->OnComplete(static_cast<void*>(this));
+                }
             }
         }
     } else {
         --Index;
         if (Index <= 0) {
             Index = TotalSteps - 1;
-            if (OnComplete != NULL) {
-                OnComplete();
+            if (PatternCompleted == 0) {
+                PatternCompleted = 1;
+                if (m_pCallbackHandler != NULL) {
+                    m_pCallbackHandler->OnComplete(static_cast<void*>(this));
+                }
             }
         }
     }
@@ -97,63 +107,43 @@ void NeoPixel_Section::Reverse() {
         Direction = FORWARD;
         Index = 0;
     }
+    // PatternCompleted == 0;
 }
 
-void NeoPixel_Section::StripOn(PatternConfig config) {
-    ActivePattern = STRIP_ON;
-    Interval = config.interval;
-    Color1 = config.color1;
-    Index = 0;
-}
+void NeoPixel_Section::StripOn(PatternConfig config) { Color1 = config.color1; }
 
 void NeoPixel_Section::StripOff(PatternConfig config) {
-    ActivePattern = STRIP_OFF;
-    Interval = config.interval;
-    Index = 0;
+    Color1 = ledStrip->Color(0, 0, 0);
 }
 
 void NeoPixel_Section::RainbowCycle(PatternConfig config) {
-    ActivePattern = RAINBOW_CYCLE;
-    Interval = config.interval;
+    // Maybe don't have TotalSteps as 255 - make it dependent on length?
     TotalSteps = 255;
-    Index = 0;
     Direction = config.dir;
 }
 
 void NeoPixel_Section::TheaterChase(PatternConfig config) {
-    ActivePattern = THEATER_CHASE;
-    Interval = config.interval;
     TotalSteps = stripLength;
     Color1 = config.color1;
     Color2 = config.color2;
-    Index = 0;
     Direction = config.dir;
 }
 
 void NeoPixel_Section::ColorWipe(PatternConfig config) {
-    ActivePattern = COLOR_WIPE;
-    Interval = config.interval;
     TotalSteps = stripLength;
     Color1 = config.color1;
-    Index = 0;
     Direction = config.dir;
 }
 
 void NeoPixel_Section::Scanner(PatternConfig config) {
-    ActivePattern = SCANNER;
-    Interval = config.interval;
     TotalSteps = (stripLength - 1) * 2;
     Color1 = config.color1;
-    Index = 0;
 }
 
 void NeoPixel_Section::Fade(PatternConfig config) {
-    ActivePattern = FADE;
-    Interval = config.interval;
     TotalSteps = config.steps;
     Color1 = config.color1;
     Color2 = config.color2;
-    Index = 0;
     Direction = config.dir;
 }
 
@@ -187,19 +177,13 @@ uint32_t NeoPixel_Section::Wheel(byte WheelPos) {
         return ledStrip->Color(WheelPos * 3, 255 - WheelPos * 3, 0);
     }
 }
-void NeoPixel_Section::StripOnUpdate() {
+void NeoPixel_Section::StripAllUpdate() {
     if (Index == 0) {
         ledStrip->fill(Color1, stripStart, stripLength);
     }
     Increment();
 }
 
-void NeoPixel_Section::StripOffUpdate() {
-    if (Index == 0) {
-        ledStrip->fill(ledStrip->Color(0, 0, 0), stripStart, stripLength);
-    }
-    Increment();
-}
 void NeoPixel_Section::RainbowCycleUpdate() {
     for (int i = 0; i < stripLength; i++) {
         ledStrip->setPixelColor(i + stripStart,
