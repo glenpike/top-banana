@@ -2,26 +2,46 @@
 #define SINGLE_LED_H
 #include <Arduino.h>
 
-enum ledPattern { OFF, ON, FLASH };
-class Single_LED {
+#include "Interfaces.h"
+
+class Single_LED : public AbstractAnimateable {
   protected:
-    int ledPin;               // the number of the LED pin
-    ledPattern ActivePattern; // which pattern is running
-    unsigned long Interval;   // milliseconds until it calls OnComplete
-    unsigned long lastShow;   // last time we called Show
+    int ledPin;
+    
+    AnimationConfig activeConfig;
+    bool animationComplete = false;
 
-    void (*OnComplete)(); // Callback when the interval expires
+    bool running = false;
+    unsigned long updateInterval;
+    unsigned long lastUpdate;
 
+    uint16_t totalSteps;
+    uint16_t currentStep;
+
+    CallBackHandler *pCallbackHandler;
+
+    int currentLedState;
+    int nextLedState;
   public:
-    int ledState; // ledState used to set the LED
 
-    Single_LED(int pin, void (*callback)());
+    Single_LED(int pin, CallBackHandler *handler);
 
-    void Toggle();
-
-    void TurnOn(unsigned long interval);
-    void TurnOff(unsigned long interval);
+    void SetCallback(CallBackHandler *handler = NULL) { pCallbackHandler = handler; }
+    void SetPattern(AnimationConfig config);
+    void Start();
+    void Pause();
+    void Reset();
     void Update();
-    void Show(unsigned long interval);
+    bool isAnimationComplete() { return animationComplete; }
+    bool isRunning() { return running; }
+
+    void Increment();
+    // void TurnOn(AnimationConfig config);
+    // void TurnOff(AnimationConfig config);
+    void Flash(AnimationConfig config);
+
+    void TurnOnUpdate();
+    void TurnOffUpdate();
+    void FlashUpdate();
 };
 #endif

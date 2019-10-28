@@ -1,56 +1,95 @@
 #include "Single_LED.h"
 
-Single_LED::Single_LED(int pin, void (*callback)()) {
+Single_LED::Single_LED(int pin, CallBackHandler *handler = NULL) {
     ledPin = pin;
     pinMode(ledPin, OUTPUT);
-    ledState = LOW;
-    OnComplete = callback;
-    Interval = 0;
+    currentLedState = LOW;
+    pCallbackHandler = handler;
+    digitalWrite(ledPin, currentLedState);
 }
 
-void Single_LED::Toggle() {
-    if (ledState == HIGH) {
-        TurnOff(Interval);
-    } else {
-        TurnOn(Interval);
+void Single_LED::SetPattern(AnimationConfig config) {
+    activeConfig = config;
+    updateInterval = config.updateInterval;
+    totalSteps = config.steps;
+    currentStep = 0;
+    animationComplete = false;
+    switch (activeConfig.animation) {
+    case FLASH:
+        Flash(config);
+        break;
+    default:
+        break;
     }
 }
 
-void Single_LED::TurnOn(unsigned long interval) {
-    if (ledState == LOW) {
-        ledState = HIGH;
-    }
-    Show(interval);
-}
-
-void Single_LED::TurnOff(unsigned long interval) {
-    if (ledState == HIGH) {
-        ledState = LOW;
-    }
-    Show(interval);
-}
+void Single_LED::Start() { running = true; }
+void Single_LED::Pause() { running = false; }
+void Single_LED::Reset() { currentStep = 0; }
 
 void Single_LED::Update() {
-    if ((millis() - lastShow) > Interval) // time to update
+    if (running && (millis() - lastUpdate) > updateInterval) // time to update
     {
-        if (OnComplete != NULL) {
-            OnComplete(); // call the comlpetion callback
+        lastUpdate = millis();
+        switch (activeConfig.animation) {
+        case ON:
+            TurnOnUpdate();
+            break;
+        case OFF:
+            TurnOffUpdate();
+            break;
+        case FLASH:
+            FlashUpdate();
+            break;
+        default:
+            break;
+        }
+        Increment();
+        digitalWrite(ledPin, currentLedState);
+    }
+}
+
+void Single_LED::Increment() {
+    currentStep++;
+    if (currentStep >= totalSteps) {
+        currentStep = 0;
+        if (animationComplete == false) {
+            animationComplete = true;
+            if (pCallbackHandler != NULL) {
+                pCallbackHandler->OnComplete(static_cast<void*>(this));
+            }
         }
     }
 }
 
-void Single_LED::Show(unsigned long interval) {
-    Interval = interval;
-    lastShow = millis();
-    digitalWrite(ledPin, ledState);
-#ifdef SERIAL_DEBUG
-    Serial.print("LED.Show: ");
-    Serial.print(ledPin);
-    Serial.print(" = ");
-    Serial.print(ledState);
-    Serial.print(" for ");
-    Serial.print(interval);
-    Serial.print(" current ");
-    Serial.println(lastShow);
-#endif
+void Single_LED::Flash(AnimationConfig config) {
+  if(currentLedState == HIGH) {
+    nextLedState = LOW;
+  } else {
+    nextLedState = HIGH;
+  }
+}
+
+void Single_LED::TurnOnUpdate() {
+  if(totalSteps == 0 || currentStep == totalSteps - 1) {
+    currentLedState = HIGH;
+  }
+}
+void Single_LED::TurnOffUpdate() {
+  if(totalSteps == 0 || currentStep == totalSteps - 1) {
+    currentLedState = LOW;
+  }
+}
+void Single_LED::FlashUpdate() {
+  if(currentStep < totalSteps / 2 && currentLedState != nextLedState) {
+    currentLedState = nextLedState;
+  } else if (currentStep >= totalSteps / 2 && currentLedState == nextLedState) {
+    if(currentLedState == LOW) {
+      currentLedState = HIGH;
+      nextLedState = LOW;
+    } else {
+      currentLedState = LOW;
+      nextLedState = HIGH;
+    }
+  }
 }

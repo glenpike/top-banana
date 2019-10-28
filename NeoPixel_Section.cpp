@@ -5,19 +5,19 @@ NeoPixel_Section::NeoPixel_Section(Adafruit_NeoPixel* strip, uint16_t start,
     ledStrip = strip;
     stripStart = start;
     stripLength = length;
-    m_pCallbackHandler = handler;
+    pCallbackHandler = handler;
 }
 
-void NeoPixel_Section::SetPattern(PatternConfig config) {
-    ActivePattern = config.pattern;
-    Interval = config.interval;
-    Index = 0;
-    PatternCompleted = 0;
-    switch (ActivePattern) {
-    case STRIP_ON:
+void NeoPixel_Section::SetPattern(AnimationConfig config) {
+    activeAnimation = config.animation;
+    updateInterval = config.updateInterval;
+    currentStep = 0;
+    animationComplete = false;
+    switch (activeAnimation) {
+    case ON:
         StripOn(config);
         break;
-    case STRIP_OFF:
+    case OFF:
         StripOff(config);
         break;
     case RAINBOW_CYCLE:
@@ -40,15 +40,23 @@ void NeoPixel_Section::SetPattern(PatternConfig config) {
     }
 }
 
+void NeoPixel_Section::Start() { 
+  running = true;
+  Serial.print("starting section @ ");
+  Serial.println(stripStart);
+}
+void NeoPixel_Section::Pause() { running = false; }
+void NeoPixel_Section::Reset() { currentStep = 0; }
+
 void NeoPixel_Section::Update() {
-    if ((millis() - lastUpdate) > Interval) // time to update
+    if (running && (millis() - lastUpdate) > updateInterval) // time to update
     {
         lastUpdate = millis();
-        switch (ActivePattern) {
-        case STRIP_ON:
+        switch (activeAnimation) {
+        case ON:
             StripAllUpdate();
             break;
-        case STRIP_OFF:
+        case OFF:
             StripAllUpdate();
             break;
         case RAINBOW_CYCLE:
@@ -74,25 +82,25 @@ void NeoPixel_Section::Update() {
 }
 
 void NeoPixel_Section::Increment() {
-    if (Direction == FORWARD) {
-        Index++;
-        if (Index >= TotalSteps) {
-            Index = 0;
-            if (PatternCompleted == 0) {
-                PatternCompleted = 1;
-                if (m_pCallbackHandler != NULL) {
-                    m_pCallbackHandler->OnComplete(static_cast<void*>(this));
+    if (direction == FORWARD) {
+        currentStep++;
+        if (currentStep >= totalSteps) {
+            currentStep = 0;
+            if (animationComplete == false) {
+                animationComplete = true;
+                if (pCallbackHandler != NULL) {
+                    pCallbackHandler->OnComplete(static_cast<void*>(this));
                 }
             }
         }
     } else {
-        --Index;
-        if (Index <= 0) {
-            Index = TotalSteps - 1;
-            if (PatternCompleted == 0) {
-                PatternCompleted = 1;
-                if (m_pCallbackHandler != NULL) {
-                    m_pCallbackHandler->OnComplete(static_cast<void*>(this));
+        --currentStep;
+        if (currentStep <= 0) {
+            currentStep = totalSteps - 1;
+            if (animationComplete == false) {
+                animationComplete = true;
+                if (pCallbackHandler != NULL) {
+                    pCallbackHandler->OnComplete(static_cast<void*>(this));
                 }
             }
         }
@@ -100,51 +108,51 @@ void NeoPixel_Section::Increment() {
 }
 
 void NeoPixel_Section::Reverse() {
-    if (Direction == FORWARD) {
-        Direction = REVERSE;
-        Index = TotalSteps - 1;
+    if (direction == FORWARD) {
+        direction = REVERSE;
+        currentStep = totalSteps - 1;
     } else {
-        Direction = FORWARD;
-        Index = 0;
+        direction = FORWARD;
+        currentStep = 0;
     }
-    // PatternCompleted == 0;
+    // animationComplete == false;
 }
 
-void NeoPixel_Section::StripOn(PatternConfig config) { Color1 = config.color1; }
+void NeoPixel_Section::StripOn(AnimationConfig config) { color1 = config.color1; }
 
-void NeoPixel_Section::StripOff(PatternConfig config) {
-    Color1 = ledStrip->Color(0, 0, 0);
+void NeoPixel_Section::StripOff(AnimationConfig config) {
+    color1 = ledStrip->Color(0, 0, 0);
 }
 
-void NeoPixel_Section::RainbowCycle(PatternConfig config) {
-    // Maybe don't have TotalSteps as 255 - make it dependent on length?
-    TotalSteps = 255;
-    Direction = config.dir;
+void NeoPixel_Section::RainbowCycle(AnimationConfig config) {
+    // Maybe don't have totalSteps as 255 - make it dependent on length?
+    totalSteps = 255;
+    direction = config.direction;
 }
 
-void NeoPixel_Section::TheaterChase(PatternConfig config) {
-    TotalSteps = stripLength;
-    Color1 = config.color1;
-    Color2 = config.color2;
-    Direction = config.dir;
+void NeoPixel_Section::TheaterChase(AnimationConfig config) {
+    totalSteps = stripLength;
+    color1 = config.color1;
+    color2 = config.color2;
+    direction = config.direction;
 }
 
-void NeoPixel_Section::ColorWipe(PatternConfig config) {
-    TotalSteps = stripLength;
-    Color1 = config.color1;
-    Direction = config.dir;
+void NeoPixel_Section::ColorWipe(AnimationConfig config) {
+    totalSteps = stripLength;
+    color1 = config.color1;
+    direction = config.direction;
 }
 
-void NeoPixel_Section::Scanner(PatternConfig config) {
-    TotalSteps = (stripLength - 1) * 2;
-    Color1 = config.color1;
+void NeoPixel_Section::Scanner(AnimationConfig config) {
+    totalSteps = (stripLength - 1) * 2;
+    color1 = config.color1;
 }
 
-void NeoPixel_Section::Fade(PatternConfig config) {
-    TotalSteps = config.steps;
-    Color1 = config.color1;
-    Color2 = config.color2;
-    Direction = config.dir;
+void NeoPixel_Section::Fade(AnimationConfig config) {
+    totalSteps = config.steps;
+    color1 = config.color1;
+    color2 = config.color2;
+    direction = config.direction;
 }
 
 uint32_t NeoPixel_Section::DimColor(uint32_t color) {
@@ -178,8 +186,8 @@ uint32_t NeoPixel_Section::Wheel(byte WheelPos) {
     }
 }
 void NeoPixel_Section::StripAllUpdate() {
-    if (Index == 0) {
-        ledStrip->fill(Color1, stripStart, stripLength);
+    if (currentStep == 0) {
+        ledStrip->fill(color1, stripStart, stripLength);
     }
     Increment();
 }
@@ -187,43 +195,42 @@ void NeoPixel_Section::StripAllUpdate() {
 void NeoPixel_Section::RainbowCycleUpdate() {
     for (int i = 0; i < stripLength; i++) {
         ledStrip->setPixelColor(i + stripStart,
-                                Wheel(((i * 256 / stripLength) + Index) & 255));
+                                Wheel(((i * 256 / stripLength) + currentStep) & 255));
     }
     Increment();
 }
 void NeoPixel_Section::TheaterChaseUpdate() {
     for (int i = 0; i < stripLength; i++) {
-        if ((i + Index) % 3 == 0) {
-            ledStrip->setPixelColor(i + stripStart, Color1);
+        if ((i + currentStep) % 3 == 0) {
+            ledStrip->setPixelColor(i + stripStart, color1);
         } else {
-            ledStrip->setPixelColor(i + stripStart, Color2);
+            ledStrip->setPixelColor(i + stripStart, color2);
         }
     }
-    //    ledStrip->show();
     Increment();
 #ifdef SERIAL_DEBUG
     Serial.print("TheaterChaseUpdate ");
-    Serial.print(Index);
+    Serial.print(currentStep);
     Serial.print(" ");
-    Serial.print(Color1);
+    Serial.print(color1);
     Serial.print(" ");
-    Serial.println(Color2);
+    Serial.println(color2);
 #endif
 }
 
 void NeoPixel_Section::ColorWipeUpdate() {
-    ledStrip->setPixelColor(Index + stripStart, Color1);
+    ledStrip->setPixelColor(currentStep + stripStart, color1);
     Increment();
 }
 
 void NeoPixel_Section::ScannerUpdate() {
     for (int i = 0; i < stripLength; i++) {
-        if (i == Index) // Scan Pixel to the right
+        if (i == currentStep) // Scan Pixel to the right
         {
-            ledStrip->setPixelColor(i + stripStart, Color1);
-        } else if (i == TotalSteps - Index) // Scan Pixel to the left
+            ledStrip->setPixelColor(i + stripStart, color1);
+        } else if (i == totalSteps - currentStep) // Scan Pixel to the left
         {
-            ledStrip->setPixelColor(i + stripStart, Color1);
+            ledStrip->setPixelColor(i + stripStart, color1);
         } else // Fading tail
         {
             ledStrip->setPixelColor(
@@ -235,24 +242,24 @@ void NeoPixel_Section::ScannerUpdate() {
 }
 
 void NeoPixel_Section::FadeUpdate() {
-    // Calculate linear interpolation between Color1 and Color2
+    // Calculate linear interpolation between color1 and color2
     // Optimise order of operations to minimize truncation error
     uint8_t red =
-        ((Red(Color1) * (TotalSteps - Index)) + (Red(Color2) * Index)) /
-        TotalSteps;
+        ((Red(color1) * (totalSteps - currentStep)) + (Red(color2) * currentStep)) /
+        totalSteps;
     uint8_t green =
-        ((Green(Color1) * (TotalSteps - Index)) + (Green(Color2) * Index)) /
-        TotalSteps;
+        ((Green(color1) * (totalSteps - currentStep)) + (Green(color2) * currentStep)) /
+        totalSteps;
     uint8_t blue =
-        ((Blue(Color1) * (TotalSteps - Index)) + (Blue(Color2) * Index)) /
-        TotalSteps;
+        ((Blue(color1) * (totalSteps - currentStep)) + (Blue(color2) * currentStep)) /
+        totalSteps;
 
     ColorSet(ledStrip->Color(red, green, blue));
     //    ledStrip->show();
     Increment();
 #ifdef SERIAL_DEBUG
     Serial.print("FadeUpdate ");
-    Serial.print(Index);
+    Serial.print(currentStep);
     Serial.print(" ");
     Serial.print(red);
     Serial.print(" ");

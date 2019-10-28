@@ -5,55 +5,118 @@
 #include <avr/power.h>
 #endif
 
+#include "Interfaces.h"
 #include "NeoPixel_Section.h"
 #include "Single_LED.h"
 #include "Sequence.h"
-// Initialise with config - start address, end address or pin.  Also animation
-// type, interval and callback.
-// Sequence is an array of animation types, interval and callbacks - type of
-// sequence - series or parallel - when all callbacks complete, animation is
-// complete?
 
-void Panel1Complete();
-void Strip1Complete();
-void Strip2Complete();
-void Strip3Complete();
+void SequenceComplete();
 
-Single_LED Panel1(6, &Panel1Complete);
+#define NEOPIXEL_PIN 4
+#define NEOPIXEL_COUNT 103
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB);
 
-#define LED_PIN 4
-#define LED_COUNT 100
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRB);
+// SINGLE LED PANELS
+#define PANEL_PINK_BALLOON 3
+#define PANEL_ROSETTE 10
+#define PANEL_SPEECH_BUBBLE 11
+#define PANEL_3_BALLOONS 9
+#define PANEL_TRAGIC_SIGN 5
+#define PANEL_THOUGHT_BUBBLE 2
 
-// PatternConfig config(THEATER_CHASE, 100, FORWARD, strip.Color(255, 255, 0),
-// strip.Color(0, 0, 50));
-// PatternConfig config(SCANNER, 100, strip.Color(255, 255, 0));
-// PatternConfig config2(RAINBOW_CYCLE, 100, FORWARD);
-// PatternConfig config3(THEATER_CHASE, 100, FORWARD, strip.Color(255, 255, 0);
+// TODO - rename to match panels.
+Single_LED led1(PANEL_PINK_BALLOON, NULL);
+Single_LED led2(PANEL_ROSETTE, NULL);
+Single_LED led3(PANEL_SPEECH_BUBBLE, NULL);
+Single_LED led4(PANEL_3_BALLOONS, NULL);
+Single_LED led5(PANEL_TRAGIC_SIGN, NULL);
+Single_LED led6(PANEL_THOUGHT_BUBBLE, NULL);
 
-PatternConfig configs[] = {
-  PatternConfig(SCANNER, 100, strip.Color(255, 255, 0)),
-  PatternConfig(RAINBOW_CYCLE, 100, FORWARD),
-  PatternConfig(THEATER_CHASE, 100, FORWARD, strip.Color(255, 255, 0))
+NeoPixel_Section purplePatch(&strip, 0, 1, NULL);
+NeoPixel_Section pinkPatch(&strip, 1, 1, NULL);
+NeoPixel_Section yellowButton(&strip, 2, 1, NULL);
+NeoPixel_Section pinkButton(&strip, 3, 1, NULL);
+NeoPixel_Section blueButton(&strip, 4, 1, NULL);
+NeoPixel_Section powBubble1(&strip, 5, 1, NULL);
+NeoPixel_Section powBubble2(&strip, 6, 1, NULL);
+NeoPixel_Section banner(&strip, 7, 6, NULL);
+NeoPixel_Section ribbon(&strip, 13, 12, NULL);
+// TODO - make these match actual counts from here
+NeoPixel_Section left(&strip, 25, 10, NULL);
+NeoPixel_Section top(&strip, 35, 10, NULL);
+NeoPixel_Section right(&strip, 45, 10, NULL);
+NeoPixel_Section bottom(&strip, 55, 10, NULL);
+NeoPixel_Section hammer(&strip, 65, 10, NULL);
+NeoPixel_Section face(&strip, 75, 10, NULL);
+NeoPixel_Section text(&strip, 85, 10, NULL);
+NeoPixel_Section money(&strip, 95, 8, NULL);
+
+
+AbstractAnimateable* outsideToCentre[] = {
+  &left, &top, &right, &bottom,
+  // &hammer, &face, &text, &money,
+  // &purplePatch, &pinkPatch,
+  // &yellowButton, &pinkButton, &blueButton, &powBubble1, &powBubble2,
+  // &banner, &ribbon,
+  &led1, &led2, &led3, &led4, &led5, &led6
 };
-PatternConfig configs2[] = {
-  PatternConfig(STRIP_ON, 100, strip.Color(255, 0, 0)),
-  PatternConfig(STRIP_ON, 100, strip.Color(0, 255, 0)),
-  PatternConfig(STRIP_ON, 100, strip.Color(0, 0, 255))
-};
-// PatternConfig config3(STRIP_ON, 100, strip.Color(0, 255, 0));
-// PatternConfig config4(STRIP_OFF, 100);
 
-NeoPixel_Section sections[] = {
-  NeoPixel_Section(&strip, 0, 10, NULL),
-  NeoPixel_Section(&strip, 10, 20, NULL),
-  NeoPixel_Section(&strip, 30, 20, NULL)
+AnimationConfig testAllOn[] = {
+  { SCANNER, 100, NULL, NULL, strip.Color(255, 0, 0) },
+  { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(0, 255, 0) },
+  { SCANNER, 100, NULL, NULL, strip.Color(0, 0, 255) },
+  { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 0) },
+  // { THEATER_CHASE, 100, NULL, FORWARD, strip.Color(255, 0, 255), strip.Color(0, 0, 255) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 0) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 128, 0) },
+  // { RAINBOW_CYCLE, 100, NULL, FORWARD },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 31, 192) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 64, 255) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 0) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 64, 255) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 9) },
+  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(0, 0, 255) },
+  { ON, 10, 1},
+  { ON, 10, 1},
+  { ON, 10, 1},
+  { ON, 10, 1},
+  { ON, 10, 1},
+  { ON, 10, 1}
 };
 
-Sequence seq(&Strip1Complete);
-// NeoPixel_Section pattern(&strip, 0, 10, &Strip1Complete);
-// NeoPixel_Section pattern2(&strip, 10, 20, &Strip2Complete);
-// NeoPixel_Section pattern3(&strip, 30, 20, &Strip3Complete);
+AnimationConfig testAllOff[] = {
+  { OFF, 100 },
+  { OFF, 100 },
+  { OFF, 100 },
+  { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  // { OFF, 100 },
+  { OFF, 10, 1},
+  { OFF, 10, 1},
+  { OFF, 10, 1},
+  { OFF, 10, 1},
+  { OFF, 10, 1},
+  { OFF, 10, 1}
+};
+
+Sequence seq(&SequenceComplete);
+
+bool onAnim = true;
+
 uint8_t counter = 0;
 
 void setup() {
@@ -67,70 +130,30 @@ void setup() {
     strip.show();
 
     delay(1000);
-// put your setup code here, to run once:
-
-
-    Panel1.TurnOn(500);
-     seq.SetSections(sections, 3);
-     seq.SetPatterns(configs, 3);
-    // pattern.SetPattern(config);
-    // pattern2.SetPattern(config2);
-    // pattern3.SetPattern(config3);
+    seq.SetAnimateables(outsideToCentre, 10);
+    seq.SetAnimations(testAllOn, 10, false);
+    seq.Start();
     strip.show();
 }
 
 void loop() {
-    // put your main code here, to run repeatedly:
-    Panel1.Update();
-    // pattern.Update();
-    // pattern2.Update();
-    // pattern3.Update();
      seq.Update();
+     strip.show();
 }
 
-void Panel1Complete() {
-    //#ifdef SERIAL_DEBUG
-    //  Serial.print("Panel1Complete");
-    //  Serial.println(Panel1.ledState);
-    //#endif
-    Panel1.Toggle();
-}
-
-void Strip1Complete() {
+void SequenceComplete() {
 #ifdef SERIAL_DEBUG
-    Serial.println("Strip1Complete");
-    //      Serial.println(Panel1.ledState);
+    Serial.println("SequenceComplete");
 #endif
-//  counter++;
-//  if(counter % 2 == 0) {
-//    seq.SetPatterns(configs, 3);
-//  } else {
-//    seq.SetPatterns(configs2, 3);
-//  }
-    //   pattern.Color1 = pattern.Wheel(random(255));
-    // pattern.Reverse();
+  seq.Pause();
+  seq.Reset();
+    
+  if(onAnim) {
+    seq.SetAnimations(testAllOff, 10, false);
+    onAnim = false;
+  } else {
+    seq.SetAnimations(testAllOn, 10, false);
+    onAnim = true;
+  }
+  seq.Start();
 }
-//void Strip2Complete() {
-//    #ifdef SERIAL_DEBUG
-//      Serial.println("Strip2Complete");
-//    #endif
-//    if (pattern.Direction == FORWARD) {
-//        pattern.Color1 = pattern.Wheel(random(255));
-//    } else {
-//        pattern.Color2 = pattern.Wheel(random(255));
-//    }
-//    pattern.Reverse();
-//}
-//
-//void Strip3Complete() {
-//#ifdef SERIAL_DEBUG
-//    Serial.println("Strip3Complete");
-//    //      Serial.println(Panel1.ledState);
-//#endif
-//    if (pattern3.ActivePattern == STRIP_ON) {
-//        pattern3.SetPattern(config4);
-//    } else {
-//        pattern3.SetPattern(config3);
-//        pattern3.Color1 = pattern.Wheel(random(255));
-//    }
-//}

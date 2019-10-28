@@ -1,29 +1,18 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
 #define SERIAL_DEBUG 1
-/* has a config for a number of strips, their animations, colours, etc. and
- * their duration */
-// Also has a strip and a callback.
-// tracks the animations internally and calls the callback when they are all
-// marked as complete.
-// class SectionConfig {
-//   public:
-//     uint8_t start;
-//     uint8_t length;
-//     SectionConfig(uint8_t s, uint8_t l) {
-//         start = s;
-//         length = l;
-//     }
-// }
-#include "NeoPixel_Section.h"
+
+#include "Interfaces.h"
 
 
 class Sequence : CallBackHandler {
   public:
     // Array of Sections
-    NeoPixel_Section* sections;
+    AbstractAnimateable** sections;
     uint8_t numSections;
 
+    bool isParallel = true;
+    bool running = false;
     uint8_t currentSection;
 
     void (*OnCompleteHandler)(); // Callback on completion of pattern
@@ -34,64 +23,90 @@ class Sequence : CallBackHandler {
         OnCompleteHandler = callback;
     }
 
-    void SetSections(NeoPixel_Section* sects, uint8_t len) {
+    void Start() { running = true; }
+    void Pause() { running = false; }
+    void Reset() { currentSection = 0; }
+
+    void SetAnimateables(AbstractAnimateable* sects[], uint8_t len) {
         numSections = len;
 #ifdef SERIAL_DEBUG
-        Serial.print("SetSections ");
+        Serial.print("SetAnimateables ");
         Serial.println(numSections);
 #endif
         sections = sects;
         currentSection = 0;
 
         for (byte i = 0; i < numSections; i++) {
-#ifdef SERIAL_DEBUG
-            Serial.print("section ");
-            Serial.print(i);
-            Serial.print(" ");
-            Serial.println(sections[i].stripStart);
-#endif
-            // Can't easily pass a pointer to a member function...
-            sections[i].SetCallback(this);
+            sections[i]->SetCallback(this);
         }
     }
 
-    void SetPatterns(PatternConfig* configs, uint8_t len) {
+    void SetAnimations(AnimationConfig* configs, uint8_t len, bool parallel = true) {
+        isParallel = parallel;
         for (byte i = 0; i < numSections; i++) {
             if (i < len) {
-                sections[i].SetPattern(configs[i]);
+                sections[i]->Pause();
+                sections[i]->Reset();
+                sections[i]->SetPattern(configs[i]);
             }
         }
         currentSection = 0;
     }
 
     void Update() {
-        // Parallel vs Series - do we want to update all animations?
-        for (byte i = 0; i < numSections; i++) {
-            sections[i].Update();
+        if(running) {
+          if(isParallel) {
+            for (byte i = 0; i < numSections; i++) {
+                if(!sections[i]->isRunning()) {
+                  sections[i]->Start();
+                }
+                sections[i]->Update();
+            }
+          } else if(currentSection < numSections) {
+            if(!sections[currentSection]->isRunning()) {
+              sections[currentSection]->Start();
+            }
+            sections[currentSection]->Update();
+          }
         }
-        //        #ifdef SERIAL_DEBUG
-        //            Serial.print("Update ");
-        //            Serial.println(numSections);
-        //#endif
     }
 
-    void OnComplete(void *p) {
+    void OnComplete(void *p) { 
+        bool patternComplete = true;
+        if(isParallel) {
+          for (byte i = 0; i < numSections; i++) {
 #ifdef SERIAL_DEBUG
-        Serial.println("OnComplete");
+            if (sections[i] == p) {
+              Serial.print("section completed: ");
+              Serial.print(i);    
+            }
+            Serial.print(" section ");
+            Serial.print(i);
+            Serial.print(" pattern complete? ");
+            Serial.println(sections[i]->isAnimationComplete());
 #endif
-        // for series, we keep track of the current animation.
-         uint8_t patternComplete = 1;
-         for (byte i = 0; i < numSections; i++) {
-             if (sections[i].PatternCompleted == 0) {
-                 patternComplete = 0;
-             }
-         }
-
-         if (patternComplete == 1) {
-           if (OnCompleteHandler != NULL) {
-               OnCompleteHandler();
-           }
-         }
+            if (sections[i]->isAnimationComplete() == false) {
+                 patternComplete = false;
+            }
+          }
+        } else {
+          if(p != sections[currentSection]) {
+            Serial.print("not section we wanted! ");
+          } else {
+            Serial.print("current section complete ");   
+            Serial.println(currentSection);
+            currentSection++;
+            if(currentSection != numSections) {
+              patternComplete = false;
+            }
+          }
+        }
+        
+        if (patternComplete == true) {
+          if (OnCompleteHandler != NULL) {
+              OnCompleteHandler();
+          }
+        }
     }
 };
 #endif
