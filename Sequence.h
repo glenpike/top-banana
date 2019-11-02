@@ -1,6 +1,6 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
-#define SERIAL_DEBUG 1
+// #define SERIAL_DEBUG 1
 
 #include "Interfaces.h"
 
@@ -25,7 +25,12 @@ class Sequence : CallBackHandler {
 
     void Start() { running = true; }
     void Pause() { running = false; }
-    void Reset() { currentSection = 0; }
+    void Reset() {
+      currentSection = 0;
+      for (byte i = 0; i < numSections; i++) {
+          sections[i]->Reset();
+      }
+    }
 
     void SetAnimateables(AbstractAnimateable* sects[], uint8_t len) {
         numSections = len;
@@ -63,6 +68,7 @@ class Sequence : CallBackHandler {
                 sections[i]->Update();
             }
           } else if(currentSection < numSections) {
+            // In series, Rainbow, etc. don't update if they're not current - is wrong?
             if(!sections[currentSection]->isRunning()) {
               sections[currentSection]->Start();
             }
@@ -71,14 +77,14 @@ class Sequence : CallBackHandler {
         }
     }
 
-    void OnComplete(void *p) { 
+    void OnComplete(void *p) {
         bool patternComplete = true;
         if(isParallel) {
           for (byte i = 0; i < numSections; i++) {
 #ifdef SERIAL_DEBUG
             if (sections[i] == p) {
-              Serial.print("section completed: ");
-              Serial.print(i);    
+              Serial.print("Sequence::OnComplete - section completed: ");
+              Serial.print(i);
             }
             Serial.print(" section ");
             Serial.print(i);
@@ -93,7 +99,7 @@ class Sequence : CallBackHandler {
           if(p != sections[currentSection]) {
             Serial.print("not section we wanted! ");
           } else {
-            Serial.print("current section complete ");   
+            Serial.print("current section complete ");
             Serial.println(currentSection);
             currentSection++;
             if(currentSection != numSections) {
@@ -101,7 +107,7 @@ class Sequence : CallBackHandler {
             }
           }
         }
-        
+
         if (patternComplete == true) {
           if (OnCompleteHandler != NULL) {
               OnCompleteHandler();
