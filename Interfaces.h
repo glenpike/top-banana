@@ -33,7 +33,7 @@ struct AbstractAnimateable {
   virtual void Start();
   virtual void Pause();
   virtual void Reset();
-  virtual void SetPattern(AnimationConfig config);
+  virtual void SetPattern(AnimationConfig *config);
   virtual void SetCallback(CallBackHandler *handler);
 };
 

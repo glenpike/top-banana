@@ -123,7 +123,7 @@ void setup() {
 #ifdef SERIAL_DEBUG
     Serial.begin(9600); // We initialize serial connection so that we could
                         // print values from sensor.
-    Serial.println("setup ");
+    Serial.println(F("setup "));
 #endif    
     strip.begin();
     strip.clear();
@@ -143,7 +143,7 @@ void loop() {
 
 void SequenceComplete() {
 #ifdef SERIAL_DEBUG
-    Serial.println("SequenceComplete");
+    Serial.println(F("SequenceComplete"));
 #endif
   seq.Pause();
   seq.Reset();

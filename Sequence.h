@@ -47,7 +47,7 @@ class Sequence : CallBackHandler {
             if (i < len) {
                 sections[i]->Pause();
                 sections[i]->Reset();
-                sections[i]->SetPattern(configs[i]);
+                sections[i]->SetPattern(&configs[i]);
             }
         }
         currentSection = 0;
