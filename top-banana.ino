@@ -12,7 +12,7 @@
 void SequenceComplete();
 
 #define NEOPIXEL_PIN 4
-#define NEOPIXEL_COUNT 60
+#define NEOPIXEL_COUNT 120
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB);
 
 // SINGLE LED PANELS
@@ -40,76 +40,90 @@ NeoPixel_Section powBubble1(&strip, 5, 1, NULL);
 NeoPixel_Section powBubble2(&strip, 6, 1, NULL);
 NeoPixel_Section banner(&strip, 7, 6, NULL);
 NeoPixel_Section ribbon(&strip, 13, 12, NULL);
-// TODO - make these match actual counts from here
-NeoPixel_Section left(&strip, 0, 10, NULL);
-NeoPixel_Section top(&strip, 10, 10, NULL);
-NeoPixel_Section right(&strip, 20, 10, NULL);
-NeoPixel_Section bottom(&strip, 30, 10, NULL);
-NeoPixel_Section hammer(&strip, 40, 10, NULL);
-NeoPixel_Section face(&strip, 50, 10, NULL);
-NeoPixel_Section text(&strip, 60, 10, NULL);
-NeoPixel_Section money(&strip, 70, 8, NULL);
+NeoPixel_Section border(&strip, 25, 40, NULL);
+NeoPixel_Section hammer(&strip, 65, 10, NULL);
+NeoPixel_Section face(&strip, 75, 10, NULL);
+NeoPixel_Section text(&strip, 85, 10, NULL);
+NeoPixel_Section money(&strip, 95, 8, NULL);
 
 
 AbstractAnimateable* outsideToCentre[] = {
-  &left, &top, &right, &bottom,
-  &hammer, //&face, &text, &money,
-  // &purplePatch, &pinkPatch,
-  // &yellowButton, &pinkButton, &blueButton, &powBubble1, &powBubble2,
-  // &banner, &ribbon,
+  &border,
+  &hammer, &face, &text, &money,
+  &purplePatch, &pinkPatch,
+  &yellowButton, &pinkButton, &blueButton, &powBubble1, &powBubble2,
+  &banner, &ribbon,
   &led1, &led2, &led3, &led4, &led5, &led6
 };
 
-#define NUM_ANIMATIONS 11
+#define NUM_ANIMATIONS 20
+AnimationConfig ledOn = { ON, 10, 1};
+AnimationConfig animOff = { OFF, 10, 1};
+AnimationConfig whiteWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(128, 128, 128) };
+AnimationConfig greenWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(0, 255, 0) };
+AnimationConfig blueWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(0, 0, 255) };
+AnimationConfig redWipe = { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(255, 0, 0) };
+AnimationConfig yellowWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 255, 0) };
+AnimationConfig orangeWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 128, 0) };
+AnimationConfig pinkWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 31, 192) };
+// AnimationConfig chase = { THEATER_CHASE, 20, NULL, FORWARD, strip.Color(255, 0, 255), strip.Color(0, 0, 255) };
+// { RAINBOW_CYCLE, 20, NULL, FORWARD },
+// { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 31, 192) },
+// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 64, 255) },
+// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 0) },
+// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 64, 255) },
+// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
+// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
+// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
+// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 9) },
+// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(0, 0, 255) },
 
-AnimationConfig testAllOn[] = {
-  { THEATER_CHASE, 50, NULL, FORWARD, strip.Color(255, 0, 255), strip.Color(0, 0, 255) },
-  { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(0, 255, 0) },
-  { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(0, 0, 255) },
-  { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(255, 0, 0) },
-  { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 0) },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 128, 0) },
-  // { RAINBOW_CYCLE, 100, NULL, FORWARD },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 31, 192) },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 64, 255) },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 0) },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 64, 255) },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 9) },
-  // { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(0, 0, 255) },
-  { ON, 10, 1},
-  { ON, 10, 1},
-  { ON, 10, 1},
-  { ON, 10, 1},
-  { ON, 10, 1},
-  { ON, 10, 1}
+AnimationConfig* testAllOn[] = {
+  &whiteWipe,
+  &blueWipe,
+  &redWipe,
+  &yellowWipe,
+  &orangeWipe,
+  &pinkWipe,
+  &pinkWipe,
+  &yellowWipe,
+  &pinkWipe,
+  &blueWipe,
+  &redWipe,
+  &blueWipe,
+  &yellowWipe,
+  &blueWipe,
+  
+  &ledOn,
+  &ledOn,
+  &ledOn,
+  &ledOn,
+  &ledOn,
+  &ledOn
 };
 
-AnimationConfig testAllOff[] = {
-  { OFF, 10 },
-  { OFF, 10 },
-  { OFF, 10 },
-  { OFF, 10 },
-  { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  // { OFF, 100 },
-  { OFF, 10, 1},
-  { OFF, 10, 1},
-  { OFF, 10, 1},
-  { OFF, 10, 1},
-  { OFF, 10, 1},
-  { OFF, 10, 1}
+AnimationConfig* testAllOff[] = {
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff
 };
 
 Sequence seq(&SequenceComplete);
@@ -122,8 +136,8 @@ void setup() {
 #ifdef SERIAL_DEBUG
     Serial.begin(9600); // We initialize serial connection so that we could
                         // print values from sensor.
-    Serial.println("setup ");
-#endif
+    Serial.println(F("setup "));
+#endif    
     strip.begin();
     strip.clear();
     strip.show();
@@ -152,7 +166,7 @@ void loop() {
 
 void SequenceComplete() {
 #ifdef SERIAL_DEBUG
-    Serial.println("SequenceComplete");
+    Serial.println(F("SequenceComplete"));
 #endif
   seq.Pause();
   seq.Reset();

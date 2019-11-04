@@ -35,7 +35,7 @@ class Sequence : CallBackHandler {
     void SetAnimateables(AbstractAnimateable* sects[], uint8_t len) {
         numSections = len;
 #ifdef SERIAL_DEBUG
-        Serial.print("SetAnimateables ");
+        Serial.print(F("SetAnimateables "));
         Serial.println(numSections);
 #endif
         sections = sects;
@@ -46,7 +46,7 @@ class Sequence : CallBackHandler {
         }
     }
 
-    void SetAnimations(AnimationConfig* configs, uint8_t len, bool parallel = true) {
+    void SetAnimations(AnimationConfig* configs[], uint8_t len, bool parallel = true) {
         isParallel = parallel;
         for (byte i = 0; i < numSections; i++) {
             if (i < len) {
@@ -83,12 +83,12 @@ class Sequence : CallBackHandler {
           for (byte i = 0; i < numSections; i++) {
 #ifdef SERIAL_DEBUG
             if (sections[i] == p) {
-              Serial.print("Sequence::OnComplete - section completed: ");
+              Serial.print(F("Sequence::OnComplete - section completed: "));
               Serial.print(i);
             }
-            Serial.print(" section ");
+            Serial.print(F(" section "));
             Serial.print(i);
-            Serial.print(" pattern complete? ");
+            Serial.print(F(" pattern complete? "));
             Serial.println(sections[i]->isAnimationComplete());
 #endif
             if (sections[i]->isAnimationComplete() == false) {
@@ -97,9 +97,9 @@ class Sequence : CallBackHandler {
           }
         } else {
           if(p != sections[currentSection]) {
-            Serial.print("not section we wanted! ");
+            Serial.print(F("not section we wanted! "));
           } else {
-            Serial.print("current section complete ");
+            Serial.print(F("current section complete "));
             Serial.println(currentSection);
             currentSection++;
             if(currentSection != numSections) {

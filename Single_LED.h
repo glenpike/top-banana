@@ -8,14 +8,11 @@ class Single_LED : public AbstractAnimateable {
   protected:
     int ledPin;
     
-    AnimationConfig activeConfig;
+    AnimationConfig *pAnimationConfig;
     bool animationComplete = false;
-
     bool running = false;
-    unsigned long updateInterval;
     unsigned long lastUpdate;
 
-    uint16_t totalSteps;
     uint16_t currentStep;
 
     CallBackHandler *pCallbackHandler;
@@ -27,7 +24,7 @@ class Single_LED : public AbstractAnimateable {
     Single_LED(int pin, CallBackHandler *handler);
 
     void SetCallback(CallBackHandler *handler = NULL) { pCallbackHandler = handler; }
-    void SetPattern(AnimationConfig config);
+    void SetPattern(AnimationConfig *config);
     void Start();
     void Pause();
     void Reset();
@@ -38,7 +35,7 @@ class Single_LED : public AbstractAnimateable {
     void Increment();
     // void TurnOn(AnimationConfig config);
     // void TurnOff(AnimationConfig config);
-    void Flash(AnimationConfig config);
+    void Flash(AnimationConfig *config);
 
     void TurnOnUpdate();
     void TurnOffUpdate();

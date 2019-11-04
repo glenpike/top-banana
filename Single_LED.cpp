@@ -8,15 +8,17 @@ Single_LED::Single_LED(int pin, CallBackHandler *handler = NULL) {
     digitalWrite(ledPin, currentLedState);
 }
 
-void Single_LED::SetPattern(AnimationConfig config) {
-    activeConfig = config;
-    updateInterval = config.updateInterval;
-    totalSteps = config.steps;
+void Single_LED::SetPattern(AnimationConfig *config) {
+    pAnimationConfig = config;
     currentStep = 0;
     animationComplete = false;
-    switch (activeConfig.animation) {
+    switch (pAnimationConfig->animation) {
     case FLASH:
-        Flash(config);
+        if(currentLedState == HIGH) {
+          nextLedState = LOW;
+        } else {
+          nextLedState = HIGH;
+        }
         break;
     default:
         break;
@@ -28,10 +30,10 @@ void Single_LED::Pause() { running = false; }
 void Single_LED::Reset() { currentStep = 0; }
 
 void Single_LED::Update() {
-    if (running && (millis() - lastUpdate) > updateInterval) // time to update
+    if (running && (millis() - lastUpdate) > pAnimationConfig->updateInterval) // time to update
     {
         lastUpdate = millis();
-        switch (activeConfig.animation) {
+        switch (pAnimationConfig->animation) {
         case ON:
             TurnOnUpdate();
             break;
@@ -51,7 +53,7 @@ void Single_LED::Update() {
 
 void Single_LED::Increment() {
     currentStep++;
-    if (currentStep >= totalSteps) {
+    if (currentStep >= pAnimationConfig->steps) {
         currentStep = 0;
         if (animationComplete == false) {
             animationComplete = true;
@@ -62,28 +64,20 @@ void Single_LED::Increment() {
     }
 }
 
-void Single_LED::Flash(AnimationConfig config) {
-  if(currentLedState == HIGH) {
-    nextLedState = LOW;
-  } else {
-    nextLedState = HIGH;
-  }
-}
-
 void Single_LED::TurnOnUpdate() {
-  if(totalSteps == 0 || currentStep == totalSteps - 1) {
+  if(pAnimationConfig->steps == 0 || currentStep == pAnimationConfig->steps - 1) {
     currentLedState = HIGH;
   }
 }
 void Single_LED::TurnOffUpdate() {
-  if(totalSteps == 0 || currentStep == totalSteps - 1) {
+  if(pAnimationConfig->steps == 0 || currentStep == pAnimationConfig->steps - 1) {
     currentLedState = LOW;
   }
 }
 void Single_LED::FlashUpdate() {
-  if(currentStep < totalSteps / 2 && currentLedState != nextLedState) {
+  if(currentStep < pAnimationConfig->steps / 2 && currentLedState != nextLedState) {
     currentLedState = nextLedState;
-  } else if (currentStep >= totalSteps / 2 && currentLedState == nextLedState) {
+  } else if (currentStep >= pAnimationConfig->steps / 2 && currentLedState == nextLedState) {
     if(currentLedState == LOW) {
       currentLedState = HIGH;
       nextLedState = LOW;
