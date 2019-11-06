@@ -60,5 +60,6 @@ class NeoPixel_Section : public AbstractAnimateable {
     void ColorWipeUpdate();
     void ScannerUpdate();
     void FadeUpdate();
+    void FlashUpdate();
 };
 #endif

@@ -79,6 +79,7 @@ class Sequence : CallBackHandler {
 
     void OnComplete(void *p) {
         bool patternComplete = true;
+        //Parallel is a bit buggy??
         if(isParallel) {
           for (byte i = 0; i < numSections; i++) {
 #ifdef SERIAL_DEBUG
@@ -86,10 +87,10 @@ class Sequence : CallBackHandler {
               Serial.print(F("Sequence::OnComplete - section completed: "));
               Serial.print(i);
             }
-            Serial.print(F(" section "));
-            Serial.print(i);
-            Serial.print(F(" pattern complete? "));
-            Serial.println(sections[i]->isAnimationComplete());
+            // Serial.print(F(" section "));
+            // Serial.print(i);
+            // Serial.print(F(" pattern complete? "));
+            // Serial.println(sections[i]->isAnimationComplete());
 #endif
             if (sections[i]->isAnimationComplete() == false) {
                  patternComplete = false;

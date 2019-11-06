@@ -114,6 +114,9 @@ void NeoPixel_Section::Update() {
         case FADE:
             FadeUpdate();
             break;
+        case FLASH:
+            FlashUpdate();
+            break;
         default:
             break;
         }
@@ -282,4 +285,13 @@ void NeoPixel_Section::FadeUpdate() {
     Serial.print(F(" "));
     Serial.println(blue);
 #endif
+}
+
+void NeoPixel_Section::FlashUpdate() {
+    if (currentStep % 2 == 0) {
+        ColorSet(pAnimationConfig->color1);
+    } else {
+        ColorSet(pAnimationConfig->color2);
+    }
+    Increment();
 }

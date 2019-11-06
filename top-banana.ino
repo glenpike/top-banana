@@ -24,12 +24,12 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GR
 #define PANEL_THOUGHT_BUBBLE 2
 
 // TODO - rename to match panels.
-Single_LED led1(PANEL_PINK_BALLOON, NULL);
-Single_LED led2(PANEL_ROSETTE, NULL);
-Single_LED led3(PANEL_SPEECH_BUBBLE, NULL);
-Single_LED led4(PANEL_3_BALLOONS, NULL);
-Single_LED led5(PANEL_TRAGIC_SIGN, NULL);
-Single_LED led6(PANEL_THOUGHT_BUBBLE, NULL);
+Single_LED panelPinkBalloon(PANEL_PINK_BALLOON, NULL);
+Single_LED panelRosette(PANEL_ROSETTE, NULL);
+Single_LED panelSpeechBubble(PANEL_SPEECH_BUBBLE, NULL);
+Single_LED panel3Balloons(PANEL_3_BALLOONS, NULL);
+Single_LED panelTragicSign(PANEL_TRAGIC_SIGN, NULL);
+Single_LED panelThoughtBubble(PANEL_THOUGHT_BUBBLE, NULL);
 
 NeoPixel_Section purplePatch(&strip, 0, 1, NULL);
 NeoPixel_Section pinkPatch(&strip, 1, 1, NULL);
@@ -47,43 +47,52 @@ NeoPixel_Section text(&strip, 85, 10, NULL);
 NeoPixel_Section money(&strip, 95, 8, NULL);
 
 
+AbstractAnimateable* original[] = {
+  &banner, 
+  &powBubble1, &powBubble2,
+  &yellowButton, &pinkButton, &blueButton,
+  &purplePatch, &pinkPatch,
+  &panelThoughtBubble,
+  &panelTragicSign,
+  &ribbon,
+  &panel3Balloons,
+  &panelSpeechBubble,
+  &panelRosette,
+  &money,
+  &panelPinkBalloon,
+  &border,
+  &hammer, &face, &text, 
+};
+
 AbstractAnimateable* outsideToCentre[] = {
   &border,
   &hammer, &face, &text, &money,
   &purplePatch, &pinkPatch,
   &yellowButton, &pinkButton, &blueButton, &powBubble1, &powBubble2,
   &banner, &ribbon,
-  &led1, &led2, &led3, &led4, &led5, &led6
+  &panelPinkBalloon, &panelRosette, &panelSpeechBubble, &panel3Balloons, &panelTragicSign, &panelThoughtBubble
 };
 
 #define NUM_ANIMATIONS 20
-AnimationConfig ledOn = { ON, 10, 1};
-AnimationConfig animOff = { OFF, 10, 1};
+AnimationConfig ledOn = { ON, 50, 1};
+AnimationConfig animOff = { OFF, 10, 0};
 AnimationConfig whiteWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(128, 128, 128) };
-AnimationConfig greenWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(0, 255, 0) };
+AnimationConfig greenWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(31, 255, 31) };
 AnimationConfig blueWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(0, 0, 255) };
 AnimationConfig redWipe = { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(255, 0, 0) };
 AnimationConfig yellowWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 255, 0) };
-AnimationConfig orangeWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 128, 0) };
+AnimationConfig purpleWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 0, 192) };
 AnimationConfig pinkWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 31, 192) };
-// AnimationConfig chase = { THEATER_CHASE, 20, NULL, FORWARD, strip.Color(255, 0, 255), strip.Color(0, 0, 255) };
-// { RAINBOW_CYCLE, 20, NULL, FORWARD },
-// { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 31, 192) },
-// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 64, 255) },
-// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 0) },
-// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 64, 255) },
-// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
-// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
-// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(31, 31, 255) },
-// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(255, 255, 9) },
-// { COLOR_WIPE, 100, NULL, FORWARD, strip.Color(0, 0, 255) },
+AnimationConfig flashYellow = { FLASH, 50, 20, NULL, strip.Color(255, 255, 0) };
+AnimationConfig chase = { THEATER_CHASE, 20, NULL, FORWARD, strip.Color(31, 255, 31), strip.Color(255, 0, 192) };
+AnimationConfig rainbow = { RAINBOW_CYCLE, 20, NULL, FORWARD };
 
 AnimationConfig* testAllOn[] = {
   &whiteWipe,
   &blueWipe,
   &redWipe,
   &yellowWipe,
-  &orangeWipe,
+  &purpleWipe,
   &pinkWipe,
   &pinkWipe,
   &yellowWipe,
@@ -100,6 +109,94 @@ AnimationConfig* testAllOn[] = {
   &ledOn,
   &ledOn,
   &ledOn
+};
+/*
+AbstractAnimateable* original[] = {
+  &banner, 
+  &powBubble1, &powBubble2,
+  &yellowButton, &pinkButton, &blueButton,
+  &purplePatch, &pinkPatch,
+  &panelThoughtBubble,
+  &panelTragicSign,
+  &ribbon,
+  &panel3Balloons,
+  &panelSpeechBubble,
+  &panelRosette,
+  &money,
+  &panelPinkBalloon,
+  &border,
+  &hammer, &face, &text, 
+};
+*/
+AnimationConfig* testOriginal[] = {
+  &yellowWipe,
+  &blueWipe,
+  &blueWipe,
+  &yellowWipe,
+  &pinkWipe,
+  &blueWipe,
+  &purpleWipe,
+  &pinkWipe,
+  &ledOn,
+  &ledOn,
+  &blueWipe,
+  &ledOn,
+  &ledOn,
+  &ledOn,
+  &whiteWipe,
+  &ledOn,
+  &greenWipe,
+  &purpleWipe,
+  &flashYellow,
+  &yellowWipe
+};
+
+AnimationConfig* testRainbow[] = {
+  &rainbow,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &rainbow,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+
+  &animOff,
+  &animOff,
+  &rainbow,
+  &rainbow,
+  &rainbow,
+  &rainbow
+};
+
+AnimationConfig* testChase[] = {
+  &chase,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+  &chase,
+  &animOff,
+  &animOff,
+  &animOff,
+  &animOff,
+
+  &animOff,
+  &animOff,
+  &chase,
+  &chase,
+  &chase,
+  &chase
 };
 
 AnimationConfig* testAllOff[] = {
@@ -128,9 +225,8 @@ AnimationConfig* testAllOff[] = {
 
 Sequence seq(&SequenceComplete);
 
-bool onAnim = true;
-
-uint8_t counter = 0;
+#define MAX_STATES 4
+uint8_t currentState = 0;
 
 void setup() {
 #ifdef SERIAL_DEBUG
@@ -142,8 +238,8 @@ void setup() {
     strip.clear();
     strip.show();
 
-    seq.SetAnimateables(outsideToCentre, NUM_ANIMATIONS);
-    seq.SetAnimations(testAllOn, NUM_ANIMATIONS, false);
+    seq.SetAnimateables(original, NUM_ANIMATIONS);
+    seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false);
     seq.Start();
     strip.show();
 }
@@ -171,13 +267,27 @@ void SequenceComplete() {
   seq.Pause();
   seq.Reset();
 
-  // left.Reverse();
-  if(onAnim) {
-    seq.SetAnimations(testAllOff, NUM_ANIMATIONS, false);
-    onAnim = false;
-  } else {
-    seq.SetAnimations(testAllOn, NUM_ANIMATIONS, false);
-    onAnim = true;
+  currentState++;
+  if (currentState == MAX_STATES) {
+    currentState = 0;
+  }
+  switch(currentState) {
+    case 0:
+      delay(1000);
+      seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false);
+      break;
+    case 1:
+      delay(1000);
+      seq.SetAnimations(testAllOff, NUM_ANIMATIONS, false);
+      break;
+    case 2:
+      delay(1000);
+      seq.SetAnimations(testChase, NUM_ANIMATIONS, false);
+      break;
+    case 3:
+      delay(1000);
+      seq.SetAnimations(testAllOff, NUM_ANIMATIONS, false);
+      break;
   }
   seq.Start();
 }
