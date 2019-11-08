@@ -32,10 +32,10 @@
 #define RIBBON_START (BANNER_START + BANNER_LENGTH)
 #define RIBBON_LENGTH 12
 #define BORDER_START (RIBBON_START + RIBBON_LENGTH)
-#define BORDER_LEFT 28
-#define BORDER_TOP 21
-#define BORDER_RIGHT 28
-#define BORDER_BOTTOM 20
+#define BORDER_LEFT 15 //28
+#define BORDER_TOP 10 //21
+#define BORDER_RIGHT 15 //28
+#define BORDER_BOTTOM 10 //20
 #define BORDER_LENGTH (BORDER_LEFT + BORDER_TOP + BORDER_RIGHT + BORDER_BOTTOM)
 #define BORDER_SPARE 8
 #define HAMMER_START (BORDER_START + BORDER_LENGTH + BORDER_SPARE)
@@ -50,7 +50,7 @@
 #define NEOPIXEL_PIN 4
 #define NEOPIXEL_COUNT (MONEY_START + MONEY_LENGTH)
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(185, NEOPIXEL_PIN, NEO_GRB);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NEOPIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB);
 
 Single_LED panelPinkBalloon(PANEL_PINK_BALLOON, NULL);
 Single_LED panelRosette(PANEL_ROSETTE, NULL);
@@ -112,7 +112,8 @@ AbstractAnimateable* original[] = {
 //   &panelPinkBalloon, &panelRosette, &panelSpeechBubble, &panel3Balloons, &panelTragicSign, &panelThoughtBubble
 // };
 
-#define NUM_ANIMATIONS 7
+// #define NUM_ANIMATIONS 7
+#define NUM_ANIMATIONS 20
 AnimationConfig ledOn = { ON, 50, 1};
 AnimationConfig animOff = { OFF, 10, 0};
 AnimationConfig whiteWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(128, 128, 128) };
@@ -149,24 +150,6 @@ AnimationConfig* testAllOn[] = {
   &ledOn,
   &ledOn
 };
-/*
-AbstractAnimateable* original[] = {
-  &banner, 
-  &powBubble1, &powBubble2,
-  &yellowButton, &pinkButton, &blueButton,
-  &purplePatch, &pinkPatch,
-  &panelThoughtBubble,
-  &panelTragicSign,
-  &ribbon,
-  &panel3Balloons,
-  &panelSpeechBubble,
-  &panelRosette,
-  &money,
-  &panelPinkBalloon,
-  &border,
-  &hammer, &face, &text, 
-};
-*/
 AnimationConfig* testOriginal[] = {
   &yellowWipe,
   &blueWipe,
@@ -332,8 +315,8 @@ void setup() {
     strip.show();
     delay(1000);
 
-    seq.SetAnimateables(stripAndPanels, NUM_ANIMATIONS);
-    seq.SetAnimations(testEverything, NUM_ANIMATIONS, false);
+    seq.SetAnimateables(original, NUM_ANIMATIONS); //stripAndPanels, NUM_ANIMATIONS);
+    seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false); //testEverything, NUM_ANIMATIONS, false);
     seq.Start();
     strip.show();
 }
@@ -358,11 +341,11 @@ void SequenceComplete() {
   switch(currentState) {
     case 0:
       delay(1000);
-      seq.SetAnimations(testEverything, NUM_ANIMATIONS, false);
+      seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false);
       break;
     case 1:
       delay(1000);
-      seq.SetAnimations(testRainbow2, NUM_ANIMATIONS, false);
+      seq.SetAnimations(testRainbow, NUM_ANIMATIONS, false);
       break;
     case 2:
       delay(1000);
