@@ -10,32 +10,32 @@
 #include "Sequence.h"
 
 // SINGLE LED PANELS
-#define PANEL_PINK_BALLOON 3
-#define PANEL_ROSETTE 10
-#define PANEL_SPEECH_BUBBLE 11
-#define PANEL_3_BALLOONS 9
-#define PANEL_TRAGIC_SIGN 5
-#define PANEL_THOUGHT_BUBBLE 2
+#define PANEL_PINK_BALLOON 6
+#define PANEL_ROSETTE 9
+#define PANEL_SPEECH_BUBBLE 10
+#define PANEL_3_BALLOONS 8
+#define PANEL_TRAGIC_SIGN 7
+#define PANEL_THOUGHT_BUBBLE 5
 
 // STRIP NeoPixel sections - 1 LED each
-#define PURPLE_PATCH 0
-#define PINK_PATCH 1
-#define YELLOW_BUTTON 2
-#define PINK_BUTTON 3
-#define BLUE_BUTTON 4
-#define POW_BUBBLE_1 5
-#define POW_BUBBLE_2 6
+#define PURPLE_PATCH 7
+#define PINK_PATCH 8
+#define YELLOW_BUTTON 9
+#define PINK_BUTTON 10
+#define BLUE_BUTTON 11
+#define POW_BUBBLE_1 12
+#define POW_BUBBLE_2 13
 
 // STRIP NeoPixel sections
-#define BANNER_START 7
+#define BANNER_START 0
 #define BANNER_LENGTH 6
-#define RIBBON_START (BANNER_START + BANNER_LENGTH)
+#define RIBBON_START (POW_BUBBLE_2 + 1)
 #define RIBBON_LENGTH 12
 #define BORDER_START (RIBBON_START + RIBBON_LENGTH)
-#define BORDER_LEFT 15 //28
-#define BORDER_TOP 10 //21
-#define BORDER_RIGHT 15 //28
-#define BORDER_BOTTOM 10 //20
+#define BORDER_LEFT 28
+#define BORDER_TOP 21
+#define BORDER_RIGHT 28
+#define BORDER_BOTTOM 20
 #define BORDER_LENGTH (BORDER_LEFT + BORDER_TOP + BORDER_RIGHT + BORDER_BOTTOM)
 #define BORDER_SPARE 8
 #define HAMMER_START (BORDER_START + BORDER_LENGTH + BORDER_SPARE)
@@ -45,7 +45,7 @@
 #define TEXT_START (FACE_START + FACE_LENGTH)
 #define TEXT_LENGTH 17
 #define MONEY_START (TEXT_START + TEXT_LENGTH)
-#define MONEY_LENGTH 8
+#define MONEY_LENGTH 2
 
 #define NEOPIXEL_PIN 4
 #define NEOPIXEL_COUNT (MONEY_START + MONEY_LENGTH)
@@ -74,7 +74,7 @@ NeoPixel_Section hammer(&strip, HAMMER_START, HAMMER_LENGTH, NULL);
 NeoPixel_Section face(&strip, FACE_START, FACE_LENGTH, NULL);
 NeoPixel_Section text(&strip, TEXT_START, TEXT_LENGTH, NULL);
 NeoPixel_Section money(&strip, MONEY_START, MONEY_LENGTH, NULL);
-NeoPixel_Section everything(&strip, 0, 185, NULL);
+NeoPixel_Section everything(&strip, 0, 100, NULL);
 
 AbstractAnimateable* stripAndPanels[] = {
   &panelThoughtBubble,
@@ -287,7 +287,7 @@ int freeMemory() {
 
 Sequence seq(&SequenceComplete);
 
-#define MAX_STATES 2
+#define MAX_STATES 4
 uint8_t currentState = 0;
 
 void setup() {
