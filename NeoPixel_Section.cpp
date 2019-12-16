@@ -31,6 +31,9 @@ void NeoPixel_Section::SetPattern(AnimationConfig *config) {
     case COLOR_WIPE:
         // uint8_t updateInterval, Direction dir = FORWARD, uint32_t color)
         pAnimationConfig->steps = stripLength;
+        if(pAnimationConfig->direction == REVERSE) {
+          currentStep = stripLength;
+        }
         break;
     case SCANNER:
         // uint8_t updateInterval, uint32_t color1)
@@ -47,11 +50,11 @@ void NeoPixel_Section::SetPattern(AnimationConfig *config) {
     Serial.print("NeoPixel_Section::SetPattern @ ");
     Serial.print(stripStart);
     Serial.print(" activeAnimation is ");
-    Serial.print(activeAnimation);
+    Serial.print(pAnimationConfig->animation);
     Serial.print(" totalSteps is ");
-    Serial.print(totalSteps);
+    Serial.print(pAnimationConfig->steps);
     Serial.print(" updateInterval ");
-    Serial.println(updateInterval);
+    Serial.println(pAnimationConfig->updateInterval);
 #endif
 }
 
@@ -125,6 +128,9 @@ void NeoPixel_Section::Update() {
 }
 
 void NeoPixel_Section::Increment() {
+    Serial.print("NeoPixel_Section::Increment @ ");
+    Serial.println(currentStep);
+    
     if (pAnimationConfig->direction == FORWARD) {
         currentStep++;
         if (currentStep >= pAnimationConfig->steps) {
@@ -137,8 +143,9 @@ void NeoPixel_Section::Increment() {
             }
         }
     } else {
+      // BUGS IN HERE IF WE START IN REVERSE
         --currentStep;
-        if (currentStep <= 0) {
+        if (currentStep < 0) {
             currentStep = pAnimationConfig->steps - 1;
             if (animationComplete == false) {
                 animationComplete = true;
@@ -148,6 +155,8 @@ void NeoPixel_Section::Increment() {
             }
         }
     }
+    Serial.print("NeoPixel_Section::Increment now ");
+    Serial.println(currentStep);
 }
 
 void NeoPixel_Section::Reverse() {
@@ -230,9 +239,9 @@ void NeoPixel_Section::TheaterChaseUpdate() {
     Serial.print(F("TheaterChaseUpdate "));
     Serial.print(currentStep);
     Serial.print(F(" "));
-    Serial.print(color1);
+    Serial.print(pAnimationConfig->color1);
     Serial.print(F(" "));
-    Serial.println(color2);
+    Serial.println(pAnimationConfig->color2);
 #endif
 }
 

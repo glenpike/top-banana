@@ -18,18 +18,18 @@
 #define PANEL_THOUGHT_BUBBLE 5
 
 // STRIP NeoPixel sections - 1 LED each
-#define PURPLE_PATCH 7
-#define PINK_PATCH 8
-#define YELLOW_BUTTON 9
-#define PINK_BUTTON 10
-#define BLUE_BUTTON 11
-#define POW_BUBBLE_1 12
-#define POW_BUBBLE_2 13
+#define PURPLE_PATCH 0
+#define PINK_PATCH 1
+#define YELLOW_BUTTON 2
+#define PINK_BUTTON 3
+#define BLUE_BUTTON 4
+#define POW_BUBBLE_1 5
+#define POW_BUBBLE_2 6
 
 // STRIP NeoPixel sections
-#define BANNER_START 0
+#define BANNER_START 7
 #define BANNER_LENGTH 6
-#define RIBBON_START (POW_BUBBLE_2 + 1)
+#define RIBBON_START (BANNER_START + BANNER_LENGTH)
 #define RIBBON_LENGTH 12
 #define BORDER_START (RIBBON_START + RIBBON_LENGTH)
 #define BORDER_LEFT 28
@@ -103,14 +103,14 @@ AbstractAnimateable* original[] = {
   &hammer, &face, &text, 
 };
 
-// AbstractAnimateable* outsideToCentre[] = {
-//   &border,
-//   &hammer, &face, &text, &money,
-//   &purplePatch, &pinkPatch,
-//   &yellowButton, &pinkButton, &blueButton, &powBubble1, &powBubble2,
-//   &banner, &ribbon,
-//   &panelPinkBalloon, &panelRosette, &panelSpeechBubble, &panel3Balloons, &panelTragicSign, &panelThoughtBubble
-// };
+AbstractAnimateable* outsideToCentre[] = {
+  &border,
+  &hammer, &face, &text, &money,
+  &purplePatch, &pinkPatch,
+  &yellowButton, &pinkButton, &blueButton, &powBubble1, &powBubble2,
+  &banner, &ribbon,
+  &panelPinkBalloon, &panelRosette, &panelSpeechBubble, &panel3Balloons, &panelTragicSign, &panelThoughtBubble
+};
 
 // #define NUM_ANIMATIONS 7
 #define NUM_ANIMATIONS 20
@@ -120,12 +120,54 @@ AnimationConfig whiteWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(128, 128
 AnimationConfig greenWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(31, 255, 31) };
 AnimationConfig blueWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(0, 0, 255) };
 AnimationConfig redWipe = { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(255, 0, 0) };
-AnimationConfig yellowWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 255, 0) };
+AnimationConfig yellowWipe = { COLOR_WIPE, 20, NULL, REVERSE, strip.Color(255, 255, 0) };
 AnimationConfig purpleWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 0, 192) };
 AnimationConfig pinkWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 31, 192) };
 AnimationConfig flashYellow = { FLASH, 50, 20, NULL, strip.Color(255, 255, 0) };
+AnimationConfig flashBlue = { FLASH, 50, 20, NULL, strip.Color(0, 0, 255) };
 AnimationConfig chase = { THEATER_CHASE, 20, NULL, FORWARD, strip.Color(31, 255, 31), strip.Color(255, 0, 192) };
 AnimationConfig rainbow = { RAINBOW_CYCLE, 20, NULL, FORWARD };
+
+AbstractAnimateable* incremental[] = {
+  &banner, 
+  &powBubble1, &powBubble2,
+  &yellowButton, &pinkButton, &blueButton,
+  &purplePatch, &pinkPatch,
+  &panelThoughtBubble,
+  &panelTragicSign,
+  &ribbon,
+  &panel3Balloons,
+  &panelSpeechBubble,
+  &panelRosette,
+  &money,
+  &panelPinkBalloon,
+  &border,
+  &hammer, &face, &text, 
+};
+
+
+AnimationConfig* testOutside[] = {
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &chase,
+  &ledOn,
+  &ledOn,
+  &ledOn,
+  &ledOn,
+  &ledOn,
+  &ledOn
+};
 
 AnimationConfig* testAllOn[] = {
   &whiteWipe,
@@ -136,19 +178,18 @@ AnimationConfig* testAllOn[] = {
   &pinkWipe,
   &pinkWipe,
   &yellowWipe,
+  &ledOn,
+  &ledOn,
   &pinkWipe,
+  &ledOn,
+  &ledOn,
+  &ledOn,
   &blueWipe,
+  &ledOn,
   &redWipe,
   &blueWipe,
   &yellowWipe,
-  &blueWipe,
-  
-  &ledOn,
-  &ledOn,
-  &ledOn,
-  &ledOn,
-  &ledOn,
-  &ledOn
+  &blueWipe
 };
 AnimationConfig* testOriginal[] = {
   &yellowWipe,
@@ -245,26 +286,6 @@ AnimationConfig* testAllOff[] = {
   &animOff
 };
 
-AnimationConfig* testEverything[] = {
-  &ledOn,
-  &ledOn,
-  &ledOn,
-  &ledOn,
-  &ledOn,
-  &ledOn,
-  &blueWipe
-};
-AnimationConfig* testRainbow2[] = {
-  &flashYellow,
-  &flashYellow,
-  &flashYellow,
-  &flashYellow,
-  &flashYellow,
-  &flashYellow,
-  &rainbow
-};
-
-
 void SequenceComplete();
 
 #ifdef __arm__
@@ -289,6 +310,7 @@ Sequence seq(&SequenceComplete);
 
 #define MAX_STATES 4
 uint8_t currentState = 0;
+uint8_t lastState = currentState;
 
 void setup() {
 #ifdef SERIAL_DEBUG
@@ -315,8 +337,8 @@ void setup() {
     strip.show();
     delay(1000);
 
-    seq.SetAnimateables(original, NUM_ANIMATIONS); //stripAndPanels, NUM_ANIMATIONS);
-    seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false); //testEverything, NUM_ANIMATIONS, false);
+    seq.SetAnimateables(outsideToCentre, NUM_ANIMATIONS);
+    seq.SetAnimations(testOutside, NUM_ANIMATIONS, true);
     seq.Start();
     strip.show();
 }
@@ -324,37 +346,52 @@ void setup() {
 void loop() {
     seq.Update();
     strip.show();
+    delay(100);
+    if (lastState != currentState) {
+      nextAnimation();
+      lastState = currentState;
+    }
+}
+
+void nextAnimation() {
+  seq.Pause();
+  seq.Reset();
+  switch(currentState) {
+    case 0:
+      delay(1000);
+      seq.SetAnimateables(original, NUM_ANIMATIONS);
+      seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false);
+      break;
+    case 1:
+      delay(1000);
+      seq.SetAnimateables(original, NUM_ANIMATIONS);
+      seq.SetAnimations(testRainbow, NUM_ANIMATIONS, true);
+      break;
+    case 2:
+      delay(1000);
+      seq.SetAnimateables(outsideToCentre, NUM_ANIMATIONS);
+      seq.SetAnimations(testOutside, NUM_ANIMATIONS, false);
+      break;
+    case 3:
+      delay(1000);
+      seq.SetAnimateables(original, NUM_ANIMATIONS);
+      seq.SetAnimations(testAllOff, NUM_ANIMATIONS, false);
+      break;
+  }
+  seq.Start();
 }
 
 void SequenceComplete() {
 #ifdef SERIAL_DEBUG
-    Serial.print(F("SequenceComplete freeMemory "));
+    Serial.print(F("SequenceComplete "));
+    Serial.print(currentState);
+    Serial.print(F(" freeMemory "));
     Serial.println(freeMemory());
 #endif
-  seq.Pause();
-  seq.Reset();
 
   currentState++;
   if (currentState == MAX_STATES) {
     currentState = 0;
   }
-  switch(currentState) {
-    case 0:
-      delay(1000);
-      seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false);
-      break;
-    case 1:
-      delay(1000);
-      seq.SetAnimations(testRainbow, NUM_ANIMATIONS, false);
-      break;
-    case 2:
-      delay(1000);
-      seq.SetAnimations(testChase, NUM_ANIMATIONS, false);
-      break;
-    case 3:
-      delay(1000);
-      seq.SetAnimations(testAllOff, NUM_ANIMATIONS, false);
-      break;
-  }
-  seq.Start();
+  
 }

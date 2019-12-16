@@ -18,7 +18,7 @@ class NeoPixel_Section : public AbstractAnimateable {
     unsigned long lastUpdate;
 
     AnimationConfig *pAnimationConfig;
-    uint16_t currentStep;
+    int16_t currentStep;
 
     CallBackHandler *pCallbackHandler;
 
