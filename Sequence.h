@@ -5,24 +5,30 @@
 #include "Interfaces.h"
 
 
-class Sequence : CallBackHandler {
+class Sequence : CallBackHandler, AbstractPlayer {
   public:
     // Array of Sections
     AbstractAnimateable** sections;
     uint8_t numSections;
 
     bool isParallel = true;
+    bool animationComplete = false;
     bool running = false;
     uint8_t currentSection;
 
-    void (*OnCompleteHandler)(); // Callback on completion of pattern
+    CallBackHandler *pCallbackHandler;
+    // void (*OnCompleteHandler)(); // Callback on completion of pattern
 
-    // Array to monitor 'OnComplete' callbacks
-    Sequence(void (*callback)()) {
+    Sequence(CallBackHandler *handler) { //void (*callback)()) {
         currentSection = 0;
-        OnCompleteHandler = callback;
+        pCallbackHandler = handler;
+        // OnCompleteHandler = callback;
     }
 
+    void SetCallback(CallBackHandler *handler = NULL) { pCallbackHandler = handler; }
+
+    bool isAnimationComplete() { return animationComplete; }
+    bool isRunning() { return running; }
     void Start() { running = true; }
     void Pause() { running = false; }
     void Reset() {
@@ -110,8 +116,8 @@ class Sequence : CallBackHandler {
         }
 
         if (patternComplete == true) {
-          if (OnCompleteHandler != NULL) {
-              OnCompleteHandler();
+          if (pCallbackHandler != NULL) {
+              pCallbackHandler->OnComplete(static_cast<void*>(this));
           }
         }
     }

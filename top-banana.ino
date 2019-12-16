@@ -261,7 +261,8 @@ int freeMemory() {
 #endif  // __arm__
 }
 
-Sequence seq(&SequenceComplete);
+CallbackWrapper cbWrapper(&SequenceComplete);
+Sequence seq(&cbWrapper);
 
 #define MAX_STATES 4
 uint8_t currentState = 0;

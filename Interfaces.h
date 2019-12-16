@@ -26,15 +26,33 @@ struct CallBackHandler {
     virtual void OnComplete(void *p);
 };
 
-struct AbstractAnimateable {
+struct AbstractPlayer {
   virtual bool isRunning();
   virtual bool isAnimationComplete();
   virtual void Update() = 0;
   virtual void Start();
   virtual void Pause();
   virtual void Reset();
-  virtual void SetPattern(AnimationConfig *config);
   virtual void SetCallback(CallBackHandler *handler);
+};
+
+struct AbstractAnimateable : AbstractPlayer  {
+  virtual void SetPattern(AnimationConfig *config);
+};
+
+class CallbackWrapper : public CallBackHandler {
+  public:
+    void (*OnCompleteHandler)(); // Callback on completion of pattern
+
+    CallbackWrapper(void (*callback)()) {
+        OnCompleteHandler = callback;
+    }
+
+    void OnComplete(void *p) {
+      if (OnCompleteHandler != NULL) {
+          OnCompleteHandler();
+      }
+    }
 };
 
 #endif

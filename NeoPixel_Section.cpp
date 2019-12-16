@@ -132,8 +132,8 @@ void NeoPixel_Section::Update() {
 }
 
 void NeoPixel_Section::Increment() {
-    Serial.print("NeoPixel_Section::Increment @ ");
-    Serial.println(currentStep);
+    // Serial.print("NeoPixel_Section::Increment @ ");
+    // Serial.println(currentStep);
     
     if (pAnimationConfig->direction == FORWARD) {
         currentStep++;
@@ -159,8 +159,8 @@ void NeoPixel_Section::Increment() {
             }
         }
     }
-    Serial.print("NeoPixel_Section::Increment now ");
-    Serial.println(currentStep);
+    // Serial.print("NeoPixel_Section::Increment now ");
+    // Serial.println(currentStep);
 }
 
 void NeoPixel_Section::Reverse() {
