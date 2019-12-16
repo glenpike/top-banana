@@ -22,11 +22,15 @@ void NeoPixel_Section::SetPattern(AnimationConfig *config) {
         break;
     case RAINBOW_CYCLE:
         // uint8_t updateInterval, Direction dir = FORWARD)
-        pAnimationConfig->steps = 255;
+        if(!pAnimationConfig->steps) {
+          pAnimationConfig->steps = stripLength;
+        }
         break;
     case THEATER_CHASE:
         // uint8_t updateInterval, Direction dir = FORWARD, uint32_t color1, uint32_t color2)
-        pAnimationConfig->steps = stripLength;
+        if(!pAnimationConfig->steps) {
+          pAnimationConfig->steps = stripLength;
+        }
         break;
     case COLOR_WIPE:
         // uint8_t updateInterval, Direction dir = FORWARD, uint32_t color)
@@ -220,9 +224,10 @@ void NeoPixel_Section::StripAllUpdate() {
 }
 
 void NeoPixel_Section::RainbowCycleUpdate() {
+    int offset = (int)(((float)currentStep / pAnimationConfig->steps) * 255);
     for (int i = 0; i < stripLength; i++) {
         ledStrip->setPixelColor(i + stripStart,
-                                Wheel(((i * 256 / stripLength) + currentStep) & 255));
+                                Wheel(((i * 256 / stripLength) + offset) & 255));
     }
     Increment();
 }

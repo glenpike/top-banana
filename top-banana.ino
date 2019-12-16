@@ -118,33 +118,15 @@ AnimationConfig ledOn = { ON, 50, 1};
 AnimationConfig animOff = { OFF, 10, 0};
 AnimationConfig whiteWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(128, 128, 128) };
 AnimationConfig greenWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(31, 255, 31) };
-AnimationConfig blueWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(0, 0, 255) };
+AnimationConfig blueWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(0, 0, 255) };
 AnimationConfig redWipe = { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(255, 0, 0) };
-AnimationConfig yellowWipe = { COLOR_WIPE, 20, NULL, REVERSE, strip.Color(255, 255, 0) };
-AnimationConfig purpleWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 0, 192) };
-AnimationConfig pinkWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 31, 192) };
+AnimationConfig yellowWipe = { COLOR_WIPE, 5, NULL, REVERSE, strip.Color(255, 255, 0) };
+AnimationConfig purpleWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(255, 0, 192) };
+AnimationConfig pinkWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(255, 31, 192) };
 AnimationConfig flashYellow = { FLASH, 50, 20, NULL, strip.Color(255, 255, 0) };
 AnimationConfig flashBlue = { FLASH, 50, 20, NULL, strip.Color(0, 0, 255) };
 AnimationConfig chase = { THEATER_CHASE, 20, NULL, FORWARD, strip.Color(31, 255, 31), strip.Color(255, 0, 192) };
-AnimationConfig rainbow = { RAINBOW_CYCLE, 20, NULL, FORWARD };
-
-AbstractAnimateable* incremental[] = {
-  &banner, 
-  &powBubble1, &powBubble2,
-  &yellowButton, &pinkButton, &blueButton,
-  &purplePatch, &pinkPatch,
-  &panelThoughtBubble,
-  &panelTragicSign,
-  &ribbon,
-  &panel3Balloons,
-  &panelSpeechBubble,
-  &panelRosette,
-  &money,
-  &panelPinkBalloon,
-  &border,
-  &hammer, &face, &text, 
-};
-
+AnimationConfig rainbow = { RAINBOW_CYCLE, 20, 20, FORWARD };
 
 AnimationConfig* testOutside[] = {
   &chase,
@@ -214,51 +196,24 @@ AnimationConfig* testOriginal[] = {
   &yellowWipe
 };
 
+// Uses the 'stripAndPanels' config!
 AnimationConfig* testRainbow[] = {
-  &rainbow,
   &animOff,
   &animOff,
   &animOff,
   &animOff,
   &animOff,
   &animOff,
-  &animOff,
-  &animOff,
-  &rainbow,
-  &animOff,
-  &animOff,
-  &animOff,
-  &animOff,
-
-  &animOff,
-  &animOff,
-  &rainbow,
-  &rainbow,
-  &rainbow,
   &rainbow
 };
 
 AnimationConfig* testChase[] = {
-  &chase,
   &animOff,
   &animOff,
   &animOff,
   &animOff,
   &animOff,
   &animOff,
-  &animOff,
-  &animOff,
-  &chase,
-  &animOff,
-  &animOff,
-  &animOff,
-  &animOff,
-
-  &animOff,
-  &animOff,
-  &chase,
-  &chase,
-  &chase,
   &chase
 };
 
@@ -337,8 +292,8 @@ void setup() {
     strip.show();
     delay(1000);
 
-    seq.SetAnimateables(outsideToCentre, NUM_ANIMATIONS);
-    seq.SetAnimations(testOutside, NUM_ANIMATIONS, true);
+    seq.SetAnimateables(original, NUM_ANIMATIONS);
+    seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false);
     seq.Start();
     strip.show();
 }
@@ -346,10 +301,18 @@ void setup() {
 void loop() {
     seq.Update();
     strip.show();
-    delay(100);
+    // delay(10);
     if (lastState != currentState) {
       nextAnimation();
       lastState = currentState;
+      // // everything.ColorSet(strip.Color(255, 0, 255));
+      // // strip.show();
+      // // delay(1000);
+      // seq.Pause();
+      // seq.Reset();
+      // seq.SetAnimateables(stripAndPanels, 7);
+      // seq.SetAnimations(testRainbow, 7, true);
+      // seq.Start();
     }
 }
 
@@ -364,13 +327,13 @@ void nextAnimation() {
       break;
     case 1:
       delay(1000);
-      seq.SetAnimateables(original, NUM_ANIMATIONS);
-      seq.SetAnimations(testRainbow, NUM_ANIMATIONS, true);
+      seq.SetAnimateables(stripAndPanels, 7);
+      seq.SetAnimations(testRainbow, 7, true);
       break;
     case 2:
       delay(1000);
-      seq.SetAnimateables(outsideToCentre, NUM_ANIMATIONS);
-      seq.SetAnimations(testOutside, NUM_ANIMATIONS, false);
+      seq.SetAnimateables(stripAndPanels, 7);
+      seq.SetAnimations(testChase, 7, false);
       break;
     case 3:
       delay(1000);
