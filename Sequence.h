@@ -1,11 +1,11 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
-// #define SERIAL_DEBUG 1
+#define SERIAL_DEBUG 1
 
 #include "Interfaces.h"
 
 
-class Sequence : CallBackHandler, AbstractPlayer {
+class Sequence : public CallBackHandler, public AbstractPlayer {
   public:
     // Array of Sections
     AbstractAnimateable** sections;
@@ -38,7 +38,7 @@ class Sequence : CallBackHandler, AbstractPlayer {
       }
     }
 
-    void SetAnimateables(AbstractAnimateable* sects[], uint8_t len) {
+    void SetAnimateables(AbstractPlayer* sects[], uint8_t len) {
         numSections = len;
 #ifdef SERIAL_DEBUG
         Serial.print(F("SetAnimateables "));
@@ -117,6 +117,7 @@ class Sequence : CallBackHandler, AbstractPlayer {
 
         if (patternComplete == true) {
           if (pCallbackHandler != NULL) {
+              Serial.println(F("calling OnComplete "));
               pCallbackHandler->OnComplete(static_cast<void*>(this));
           }
         }

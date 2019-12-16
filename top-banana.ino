@@ -76,6 +76,23 @@ NeoPixel_Section text(&strip, TEXT_START, TEXT_LENGTH, NULL);
 NeoPixel_Section money(&strip, MONEY_START, MONEY_LENGTH, NULL);
 NeoPixel_Section everything(&strip, 0, 100, NULL);
 
+NeoPixel_Section left(&strip, BORDER_START, BORDER_LEFT, NULL);
+NeoPixel_Section top(&strip,  BORDER_START + BORDER_LEFT, BORDER_TOP, NULL);
+NeoPixel_Section right(&strip, BORDER_START + BORDER_LEFT + BORDER_TOP, BORDER_RIGHT, NULL);
+NeoPixel_Section bottom(&strip, BORDER_START + BORDER_LEFT + BORDER_TOP + BORDER_RIGHT, BORDER_BOTTOM, NULL);
+
+AbstractAnimateable* topAndBottom[] = {
+  &top,
+  &bottom
+};
+AbstractAnimateable* leftAndRight[] = {
+  &left,
+  &right,
+};
+
+Sequence tb(NULL);
+Sequence lr(NULL);
+
 AbstractAnimateable* stripAndPanels[] = {
   &panelThoughtBubble,
   &panelTragicSign,
@@ -127,6 +144,21 @@ AnimationConfig flashYellow = { FLASH, 50, 20, NULL, strip.Color(255, 255, 0) };
 AnimationConfig flashBlue = { FLASH, 50, 20, NULL, strip.Color(0, 0, 255) };
 AnimationConfig chase = { THEATER_CHASE, 20, NULL, FORWARD, strip.Color(31, 255, 31), strip.Color(255, 0, 192) };
 AnimationConfig rainbow = { RAINBOW_CYCLE, 20, 20, FORWARD };
+
+AnimationConfig* testTB[] = {
+  &yellowWipe,
+  &greenWipe
+};
+
+AnimationConfig* testLR[] = {
+  &redWipe,
+  &blueWipe
+};
+
+AbstractPlayer* nested[] {
+  &tb,
+  &lr
+};
 
 AnimationConfig* testOutside[] = {
   &chase,
@@ -293,8 +325,13 @@ void setup() {
     strip.show();
     delay(1000);
 
-    seq.SetAnimateables(original, NUM_ANIMATIONS);
-    seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false);
+    tb.SetAnimateables(topAndBottom, 2);
+    lr.SetAnimateables(leftAndRight, 2);
+    tb.SetAnimations(testTB, 2, false);
+    lr.SetAnimations(testLR, 2, false);
+    seq.isParallel = false;
+    seq.SetAnimateables(nested, 2);
+    // seq.SetAnimations(nested, NUM_ANIMATIONS, false);
     seq.Start();
     strip.show();
 }
@@ -304,16 +341,15 @@ void loop() {
     strip.show();
     // delay(10);
     if (lastState != currentState) {
-      nextAnimation();
+      // nextAnimation();
       lastState = currentState;
-      // // everything.ColorSet(strip.Color(255, 0, 255));
-      // // strip.show();
-      // // delay(1000);
-      // seq.Pause();
-      // seq.Reset();
-      // seq.SetAnimateables(stripAndPanels, 7);
-      // seq.SetAnimations(testRainbow, 7, true);
-      // seq.Start();
+      everything.ColorSet(strip.Color(255, 0, 255));
+      strip.show();
+      delay(1000);
+      seq.Pause();
+      seq.Reset();
+      seq.SetAnimateables(nested, 2);
+      seq.Start();
     }
 }
 
