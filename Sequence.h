@@ -1,6 +1,6 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
-// #define SERIAL_DEBUG 1
+// #define SEQUENCE_DEBUG 1
 
 #include "Interfaces.h"
 
@@ -34,7 +34,7 @@ class Sequence : CallBackHandler {
 
     void SetAnimateables(AbstractAnimateable* sects[], uint8_t len) {
         numSections = len;
-#ifdef SERIAL_DEBUG
+#ifdef SEQUENCE_DEBUG
         Serial.print(F("SetAnimateables "));
         Serial.println(numSections);
 #endif
@@ -82,7 +82,7 @@ class Sequence : CallBackHandler {
         //Parallel is a bit buggy??
         if(isParallel) {
           for (byte i = 0; i < numSections; i++) {
-#ifdef SERIAL_DEBUG
+#ifdef SEQUENCE_DEBUG
             if (sections[i] == p) {
               Serial.print(F("Sequence::OnComplete - section completed: "));
               Serial.print(i);
@@ -98,10 +98,15 @@ class Sequence : CallBackHandler {
           }
         } else {
           if(p != sections[currentSection]) {
-            Serial.print(F("not section we wanted! "));
+#ifdef SEQUENCE_DEBUG
+            Serial.println(F("not section we wanted! "));
+#endif
+            patternComplete = false;
           } else {
+#ifdef SEQUENCE_DEBUG
             Serial.print(F("current section complete "));
             Serial.println(currentSection);
+#endif
             currentSection++;
             if(currentSection != numSections) {
               patternComplete = false;
