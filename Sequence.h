@@ -105,6 +105,8 @@ class Sequence : public CallBackHandler, public AbstractPlayer {
         } else {
           if(p != sections[currentSection]) {
             Serial.print(F("not section we wanted! "));
+            Serial.println(currentSection);
+            patternComplete = false;
           } else {
             Serial.print(F("current section complete "));
             Serial.println(currentSection);

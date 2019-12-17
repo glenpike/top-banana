@@ -1,5 +1,5 @@
 #include "NeoPixel_Section.h"
-// #define SERIAL_DEBUG 1
+#define SERIAL_DEBUG 1
 NeoPixel_Section::NeoPixel_Section(Adafruit_NeoPixel* strip, uint16_t start,
                                    uint16_t length, CallBackHandler *handler = NULL) {
     ledStrip = strip;
