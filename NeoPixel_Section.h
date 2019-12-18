@@ -11,6 +11,7 @@ class NeoPixel_Section : public AbstractAnimateable {
     Adafruit_NeoPixel* ledStrip;
     uint16_t stripStart;
     uint16_t stripLength;
+    uint16_t steps;
 
     bool animationComplete = false;
 

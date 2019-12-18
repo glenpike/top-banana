@@ -103,22 +103,6 @@ AbstractAnimateable* original[] = {
   &hammer, &face, &text, 
 };
 
-
-AbstractAnimateable* upToBorder[] = {
-  &banner, 
-  &powBubble1, &powBubble2,
-  &yellowButton, &pinkButton, &blueButton,
-  &purplePatch, &pinkPatch,
-  &panelThoughtBubble,
-  &panelTragicSign,
-  &ribbon,
-  &panel3Balloons,
-  &panelSpeechBubble,
-  &panelRosette,
-  &money,
-  &panelPinkBalloon
-};
-
 AbstractAnimateable* outsideToCentre[] = {
   &border,
   &hammer, &face, &text, &money,
@@ -132,13 +116,13 @@ AbstractAnimateable* outsideToCentre[] = {
 #define NUM_ANIMATIONS 20
 AnimationConfig ledOn = { ON, 50, 1};
 AnimationConfig animOff = { OFF, 10, 0};
-AnimationConfig whiteWipe = { COLOR_WIPE, 5, NULL, FORWARD, strip.Color(128, 128, 128) };
+AnimationConfig whiteWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(128, 128, 128) };
 AnimationConfig greenWipe = { COLOR_WIPE, 1, NULL, FORWARD, strip.Color(31, 255, 31) };
-AnimationConfig blueWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(0, 0, 255) };
+AnimationConfig blueWipe = { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(0, 0, 255) };
 AnimationConfig redWipe = { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(255, 0, 0) };
-AnimationConfig yellowWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 255, 0) };
-AnimationConfig purpleWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 0, 192) };
-AnimationConfig pinkWipe = { COLOR_WIPE, 20, NULL, FORWARD, strip.Color(255, 31, 192) };
+AnimationConfig yellowWipe = { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(255, 255, 0) };
+AnimationConfig purpleWipe = { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(255, 0, 192) };
+AnimationConfig pinkWipe = { COLOR_WIPE, 50, NULL, FORWARD, strip.Color(255, 31, 192) };
 AnimationConfig flashYellow = { FLASH, 50, 20, NULL, strip.Color(255, 255, 0) };
 AnimationConfig flashBlue = { FLASH, 50, 20, NULL, strip.Color(0, 0, 255) };
 AnimationConfig chase = { THEATER_CHASE, 20, NULL, FORWARD, strip.Color(31, 255, 31), strip.Color(255, 0, 192) };
@@ -212,6 +196,14 @@ AnimationConfig* testOriginal[] = {
   &yellowWipe
 };
 
+AbstractAnimateable* upToBorder[] = {
+  &banner, 
+  &powBubble1, &powBubble2,
+  &yellowButton, &pinkButton, &blueButton,
+  &purplePatch, &pinkPatch,
+  &ribbon
+};
+
 AnimationConfig* testUpToBorder[] = {
   &yellowWipe,
   &blueWipe,
@@ -221,14 +213,7 @@ AnimationConfig* testUpToBorder[] = {
   &blueWipe,
   &purpleWipe,
   &pinkWipe,
-  &ledOn,
-  &ledOn,
-  &blueWipe,
-  &ledOn,
-  &ledOn,
-  &ledOn,
-  &whiteWipe,
-  &ledOn
+  &blueWipe
 };
 
 AbstractAnimateable* buttons[] = {
@@ -332,8 +317,8 @@ void setup() {
     everything.ColorSet(strip.Color(0, 0, 0));
     strip.show();
     delay(1000);
-     seq.SetAnimateables(upToBorder, 16);
-     seq.SetAnimations(testUpToBorder, 16, false);
+     seq.SetAnimateables(original, NUM_ANIMATIONS);
+     seq.SetAnimations(testOriginal, NUM_ANIMATIONS, false);
 //    seq.SetAnimateables(buttons, 7);
 //    seq.SetAnimations(testButtons, 7, false);
     seq.Start();
@@ -347,11 +332,11 @@ void loop() {
       nextAnimation();
       lastState = currentState;
 
-//      everything.ColorSet(strip.Color(0, 0, 0));
-//      strip.show();
-//      delay(1000);
-//      seq.SetAnimateables(buttons, 7);
-//      seq.SetAnimations(testButtons, 7, false);
+    //  everything.ColorSet(strip.Color(0, 0, 0));
+    //  strip.show();
+    //  delay(1000);
+    //  seq.SetAnimateables(upToBorder, 9);
+    //  seq.SetAnimations(testUpToBorder, 9, false);
     
     }
 }
